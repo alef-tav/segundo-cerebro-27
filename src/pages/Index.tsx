@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee } from "lucide-react";
+import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Bot } from "lucide-react";
 import { AIChatbot } from "@/components/AIChatbot";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -10,14 +11,19 @@ const Index = () => {
     <div className="space-y-6 animate-in">
       <div className="flex justify-between items-center">
         <h1 className="font-display text-2xl font-bold">Resumo do seu dia - {currentDate}</h1>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon" className="ml-2">
+              <Bot className="h-5 w-5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[400px] p-0">
+            <AIChatbot />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-        {/* Chatbot IA */}
-        <Card className="p-6 bg-secondary col-span-1 lg:col-span-3">
-          <AIChatbot />
-        </Card>
-
         {/* Checklist Diário */}
         <Card className="p-6 bg-secondary col-span-1">
           <div className="space-y-4">

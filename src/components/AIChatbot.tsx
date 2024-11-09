@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,13 +33,13 @@ export function AIChatbot() {
   };
 
   return (
-    <Card className="p-4 bg-secondary">
+    <div className="p-4">
       <div className="flex items-center gap-2 mb-4">
         <Bot className="h-5 w-5 text-primary" />
         <h2 className="font-display text-lg font-semibold">Assistente IA</h2>
       </div>
       
-      <ScrollArea className="h-[200px] mb-4 pr-4">
+      <ScrollArea className="h-[300px] mb-4 pr-4">
         <div className="space-y-4">
           {messages.map((message, index) => (
             <div
@@ -80,6 +79,6 @@ export function AIChatbot() {
           <Send className="h-4 w-4" />
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }
