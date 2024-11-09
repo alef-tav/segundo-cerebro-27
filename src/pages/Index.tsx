@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee } from "lucide-react";
+import { AIChatbot } from "@/components/AIChatbot";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -12,6 +13,11 @@ const Index = () => {
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+        {/* Chatbot IA */}
+        <Card className="p-6 bg-secondary col-span-1 lg:col-span-3">
+          <AIChatbot />
+        </Card>
+
         {/* Checklist Diário */}
         <Card className="p-6 bg-secondary col-span-1">
           <div className="space-y-4">
