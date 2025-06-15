@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { FinancialProvider } from "./contexts/FinancialContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import Resumo from "./pages/Resumo";
 import Flow from "./pages/Flow";
 import Meta from "./pages/Meta";
@@ -38,27 +41,36 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <FinancialProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/resumo" element={<Resumo />} />
-              <Route path="/flow" element={<Flow />} />
-              <Route path="/meta" element={<Meta />} />
-              <Route path="/compromissos" element={<Compromissos />} />
-              <Route path="/habitos" element={<Habitos />} />
-              <Route path="/conhecimento" element={<Conhecimento />} />
-              <Route path="/mindfulness" element={<Mindfulness />} />
-              <Route path="/anotacoes" element={<Anotacoes />} />
-              <Route path="/financeiro" element={<Financeiro />} />
-              <Route path="/financeiro/contas" element={<Contas />} />
-              <Route path="/financeiro/relatorios" element={<Relatorios />} />
-              <Route path="/financeiro/calendario" element={<Calendario />} />
-              <Route path="/financeiro/configuracoes" element={<Configuracoes />} />
-              <Route path="/treino" element={<Treino />} />
-            </Routes>
-          </Layout>
-        </FinancialProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <FinancialProvider>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/resumo" element={<Resumo />} />
+                      <Route path="/flow" element={<Flow />} />
+                      <Route path="/meta" element={<Meta />} />
+                      <Route path="/compromissos" element={<Compromissos />} />
+                      <Route path="/habitos" element={<Habitos />} />
+                      <Route path="/conhecimento" element={<Conhecimento />} />
+                      <Route path="/mindfulness" element={<Mindfulness />} />
+                      <Route path="/anotacoes" element={<Anotacoes />} />
+                      <Route path="/financeiro" element={<Financeiro />} />
+                      <Route path="/financeiro/contas" element={<Contas />} />
+                      <Route path="/financeiro/relatorios" element={<Relatorios />} />
+                      <Route path="/financeiro/calendario" element={<Calendario />} />
+                      <Route path="/financeiro/configuracoes" element={<Configuracoes />} />
+                      <Route path="/treino" element={<Treino />} />
+                    </Routes>
+                  </Layout>
+                </FinancialProvider>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
