@@ -19,9 +19,10 @@ interface NewAccountFormData {
 
 interface NewAccountDialogProps {
   onAddAccount: (account: any) => void;
+  children?: React.ReactNode;
 }
 
-export function NewAccountDialog({ onAddAccount }: NewAccountDialogProps) {
+export function NewAccountDialog({ onAddAccount, children }: NewAccountDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { financialType } = useFinancialContext();
   const form = useForm<NewAccountFormData>();
@@ -73,10 +74,12 @@ export function NewAccountDialog({ onAddAccount }: NewAccountDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Conta
-        </Button>
+        {children || (
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Conta
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>

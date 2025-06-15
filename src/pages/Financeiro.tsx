@@ -1,5 +1,7 @@
+
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
 import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
+import { NewAccountDialog } from "@/components/financial/NewAccountDialog";
 import { useFinancialContext } from "@/contexts/FinancialContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,74 @@ const Financeiro = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("pessoal");
   const [transactionType, setTransactionType] = useState("receita");
+
+  // Estado para contas pessoais
+  const [contasPessoais, setContasPessoais] = useState([
+    { 
+      id: 1, 
+      nome: "Banco PagSeguro", 
+      tipo: "Conta Corrente", 
+      saldo: 15000.00, 
+      icon: Building,
+      cor: "bg-blue-500",
+      receitas: 1000.00,
+      despesas: 200.00,
+    },
+    { 
+      id: 2, 
+      nome: "Cartão de Crédito", 
+      tipo: "Cartão", 
+      saldo: -2500.00, 
+      icon: Building,
+      cor: "bg-purple-500",
+      receitas: 0.00,
+      despesas: 326.25,
+    },
+    { 
+      id: 3, 
+      nome: "Banco Inter", 
+      tipo: "Conta Corrente", 
+      saldo: 8750.00, 
+      icon: Building,
+      cor: "bg-orange-500",
+      receitas: 500.00,
+      despesas: 0.00,
+    },
+  ]);
+
+  // Estado para contas empresariais
+  const [contasEmpresariais, setContasEmpresariais] = useState([
+    { 
+      id: 1, 
+      nome: "Conta Empresarial Principal", 
+      tipo: "Conta Corrente PJ", 
+      saldo: 85000.00, 
+      icon: Building,
+      cor: "bg-green-500",
+      receitas: 40000.00,
+      despesas: 20000.00,
+    },
+    { 
+      id: 2, 
+      nome: "Conta de Investimentos", 
+      tipo: "Conta Investimento", 
+      saldo: 150000.00, 
+      icon: Building,
+      cor: "bg-blue-500",
+      receitas: 0.00,
+      despesas: 0.00,
+    },
+    { 
+      id: 3, 
+      nome: "Cartão Empresarial", 
+      tipo: "Cartão Corporativo", 
+      saldo: -8500.00, 
+      icon: Building,
+      cor: "bg-red-500",
+      receitas: 0.00,
+      despesas: 8500.00,
+    },
+  ]);
 
   // Estado para transações pessoais
   const [receitasPessoais, setReceitasPessoais] = useState([
@@ -112,6 +182,15 @@ const Financeiro = () => {
     },
   ]);
 
+  // Função para adicionar nova conta
+  const handleAddAccount = (novaConta: any) => {
+    if (financialType === 'pessoal') {
+      setContasPessoais(prev => [...prev, { ...novaConta, icon: Building }]);
+    } else {
+      setContasEmpresariais(prev => [...prev, { ...novaConta, icon: Building }]);
+    }
+  };
+
   // Funções para deletar transações
   const deleteReceita = (id: number, tipo: 'pessoal' | 'empresarial') => {
     if (tipo === 'pessoal') {
@@ -128,6 +207,9 @@ const Financeiro = () => {
       setDespesasEmpresariais(prev => prev.filter(item => item.id !== id));
     }
   };
+
+  // Obter contas baseado no tipo financeiro
+  const contas = financialType === 'pessoal' ? contasPessoais : contasEmpresariais;
 
   // Cálculos dinâmicos para finanças pessoais
   const totalReceitasPessoais = receitasPessoais.reduce((sum, receita) => sum + receita.valor, 0);
@@ -398,67 +480,35 @@ const Financeiro = () => {
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">📊 Contas</h3>
               <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-                <Card className="p-6 bg-secondary border-0">
-                  <h4 className="font-semibold mb-2">Banco PagSeguro</h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">{formatCurrency(0)}</span>
+                {contas.map((conta) => (
+                  <Card key={conta.id} className="p-6 bg-secondary border-0">
+                    <h4 className="font-semibold mb-2">{conta.nome}</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Balance</span>
+                        <span className="font-bold">{formatCurrency(conta.saldo)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-500">↗ Income</span>
+                        <span className="text-green-500">{formatCurrency(conta.receitas)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-red-500">↘ Expenses</span>
+                        <span className="text-red-500">{formatCurrency(conta.despesas)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">{formatCurrency(1000)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">{formatCurrency(200)}</span>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                ))}
 
-                <Card className="p-6 bg-secondary border-0">
-                  <h4 className="font-semibold mb-2">Cartão de Crédito</h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">{formatCurrency(0)}</span>
+                <NewAccountDialog onAddAccount={handleAddAccount}>
+                  <Card className="p-6 bg-secondary border-0 hover:bg-secondary/80 cursor-pointer transition-colors">
+                    <div className="flex items-center justify-center py-8 text-muted-foreground">
+                      <Plus className="h-6 w-6 mr-2" />
+                      <span>Adicionar Nova Conta</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">{formatCurrency(0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">{formatCurrency(326.25)}</span>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-6 bg-secondary border-0">
-                  <h4 className="font-semibold mb-2">Banco Inter</h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">{formatCurrency(0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">{formatCurrency(500)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">{formatCurrency(0)}</span>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </NewAccountDialog>
               </div>
-
-              <Card className="p-6 bg-secondary border-0">
-                <div className="flex items-center justify-center py-8 text-muted-foreground">
-                  <Plus className="h-6 w-6 mr-2" />
-                  <span>Adicionar Nova Conta</span>
-                </div>
-              </Card>
             </div>
 
             {/* Transações Recentes - Duas Colunas */}
@@ -626,30 +676,34 @@ const Financeiro = () => {
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">🏢 Contas Empresariais</h3>
               <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-                <Card className="p-6 bg-secondary border-0">
-                  <h4 className="font-semibold mb-2">Conta Empresarial Principal</h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">{formatCurrency(saldoEmpresarial)}</span>
+                {contas.map((conta) => (
+                  <Card key={conta.id} className="p-6 bg-secondary border-0">
+                    <h4 className="font-semibold mb-2">{conta.nome}</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Balance</span>
+                        <span className="font-bold">{formatCurrency(conta.saldo)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-500">↗ Income</span>
+                        <span className="text-green-500">{formatCurrency(conta.receitas)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-red-500">↘ Expenses</span>
+                        <span className="text-red-500">{formatCurrency(conta.despesas)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">{formatCurrency(totalReceitasEmpresariais)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">{formatCurrency(totalDespesasEmpresariais)}</span>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                ))}
 
-                <Card className="p-6 bg-secondary border-0">
-                  <div className="flex items-center justify-center py-8 text-muted-foreground">
-                    <Plus className="h-6 w-6 mr-2" />
-                    <span>Adicionar Nova Conta</span>
-                  </div>
-                </Card>
+                <NewAccountDialog onAddAccount={handleAddAccount}>
+                  <Card className="p-6 bg-secondary border-0 hover:bg-secondary/80 cursor-pointer transition-colors">
+                    <div className="flex items-center justify-center py-8 text-muted-foreground">
+                      <Plus className="h-6 w-6 mr-2" />
+                      <span>Adicionar Nova Conta</span>
+                    </div>
+                  </Card>
+                </NewAccountDialog>
               </div>
             </div>
 
