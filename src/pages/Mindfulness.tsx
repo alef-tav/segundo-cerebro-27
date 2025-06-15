@@ -133,9 +133,9 @@ const Mindfulness = () => {
                   className="rounded-full w-20 h-20 flex items-center justify-center"
                 >
                   {isPlaying ? (
-                    <Pause className="h-10 w-10" />
+                    <Pause className="h-16 w-16" />
                   ) : (
-                    <Play className="h-10 w-10 ml-1" />
+                    <Play className="h-16 w-16 ml-1" />
                   )}
                 </Button>
                 
