@@ -16,6 +16,9 @@ import Mindfulness from "./pages/Mindfulness";
 import Anotacoes from "./pages/Anotacoes";
 import Financeiro from "./pages/Financeiro";
 import Treino from "./pages/Treino";
+import Contas from "./pages/financeiro/Contas";
+import Relatorios from "./pages/financeiro/Relatorios";
+import Calendario from "./pages/financeiro/Calendario";
 
 // Criar o queryClient fora do componente para evitar recriação
 const queryClient = new QueryClient({
@@ -45,6 +48,9 @@ const App = () => (
             <Route path="/mindfulness" element={<Mindfulness />} />
             <Route path="/anotacoes" element={<Anotacoes />} />
             <Route path="/financeiro" element={<Financeiro />} />
+            <Route path="/financeiro/contas" element={<Contas />} />
+            <Route path="/financeiro/relatorios" element={<Relatorios />} />
+            <Route path="/financeiro/calendario" element={<Calendario />} />
             <Route path="/treino" element={<Treino />} />
           </Routes>
         </Layout>
