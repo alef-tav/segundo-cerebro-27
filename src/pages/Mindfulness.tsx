@@ -129,7 +129,7 @@ const Mindfulness = () => {
                 <Button 
                   onClick={handlePlayPause}
                   size="lg"
-                  className="rounded-full w-16 h-16 flex items-center justify-center relative"
+                  className="rounded-full w-16 h-16 flex items-center justify-center"
                 >
                   {isPlaying ? (
                     <Pause className="h-6 w-6" />
