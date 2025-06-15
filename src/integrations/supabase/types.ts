@@ -9,6 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      financial_accounts: {
+        Row: {
+          cor: string
+          created_at: string
+          despesas: number
+          financial_type: string
+          id: string
+          nome: string
+          receitas: number
+          saldo: number
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          despesas?: number
+          financial_type: string
+          id?: string
+          nome: string
+          receitas?: number
+          saldo?: number
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          despesas?: number
+          financial_type?: string
+          id?: string
+          nome?: string
+          receitas?: number
+          saldo?: number
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          account_id: string
+          categoria: string
+          created_at: string
+          data: string
+          descricao: string | null
+          id: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          account_id: string
+          categoria: string
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          account_id?: string
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

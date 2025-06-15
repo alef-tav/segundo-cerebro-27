@@ -5,10 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useFinancialContext } from "@/contexts/FinancialContext";
-import { formatCurrency } from "@/lib/currency";
 
 interface NewAccountFormData {
   nome: string;
@@ -20,9 +19,10 @@ interface NewAccountFormData {
 interface NewAccountDialogProps {
   onAddAccount: (account: any) => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 
-export function NewAccountDialog({ onAddAccount, children }: NewAccountDialogProps) {
+export function NewAccountDialog({ onAddAccount, children, disabled = false }: NewAccountDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { financialType } = useFinancialContext();
   const form = useForm<NewAccountFormData>();
@@ -54,29 +54,26 @@ export function NewAccountDialog({ onAddAccount, children }: NewAccountDialogPro
     "Conta de Reserva"
   ];
 
-  const onSubmit = (data: NewAccountFormData) => {
-    const novaConta = {
-      id: Date.now(),
-      nome: data.nome,
-      tipo: data.tipo,
-      saldo: data.saldoInicial,
-      cor: data.cor,
-      receitas: 0,
-      despesas: 0,
-      transacoes: []
-    };
-
-    onAddAccount(novaConta);
-    form.reset();
-    setIsOpen(false);
+  const onSubmit = async (data: NewAccountFormData) => {
+    try {
+      await onAddAccount(data);
+      form.reset();
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Erro ao adicionar conta:', error);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button className="bg-blue-600 hover:bg-blue-700" disabled={disabled}>
+            {disabled ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
             Nova Conta
           </Button>
         )}
@@ -183,7 +180,10 @@ export function NewAccountDialog({ onAddAccount, children }: NewAccountDialogPro
               )}
             />
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={disabled}>
+              {disabled ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
               Adicionar Conta
             </Button>
           </form>
