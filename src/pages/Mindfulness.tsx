@@ -130,12 +130,12 @@ const Mindfulness = () => {
                 <Button 
                   onClick={handlePlayPause}
                   size="lg"
-                  className="rounded-full w-16 h-16"
+                  className="rounded-full w-20 h-20 flex items-center justify-center"
                 >
                   {isPlaying ? (
-                    <Pause className="h-8 w-8" />
+                    <Pause className="h-10 w-10" />
                   ) : (
-                    <Play className="h-8 w-8" />
+                    <Play className="h-10 w-10 ml-1" />
                   )}
                 </Button>
                 
@@ -155,7 +155,7 @@ const Mindfulness = () => {
                   ? "Meditação concluída! 🧘‍♀️" 
                   : isPlaying 
                     ? "Meditação em andamento..." 
-                    : "Clique no cronômetro ou pressione play para iniciar"
+                    : "Clique no botão play para iniciar"
                 }
               </p>
             </div>
