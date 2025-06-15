@@ -135,10 +135,12 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   };
 
   const toggleReminder = (id: string, completed: boolean) => {
+    console.log('Toggling reminder:', id, 'current completed:', completed, 'new completed:', !completed);
     toggleReminderMutation.mutate({ id, completed: !completed });
   };
 
   const removeReminder = (id: string) => {
+    console.log('Removing reminder:', id);
     removeReminderMutation.mutate(id);
   };
 
@@ -159,6 +161,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   ];
 
   const displayReminders = reminders.length > 0 ? reminders : defaultReminders;
+  const isUsingDefaultReminders = reminders.length === 0;
 
   return (
     <Card className={`p-6 bg-secondary border-0 ${className}`}>
@@ -230,18 +233,28 @@ export function RemindersSection({ className }: RemindersSectionProps) {
               >
                 <Checkbox
                   checked={reminder.completed}
-                  onCheckedChange={() => toggleReminder(reminder.id, reminder.completed)}
+                  onCheckedChange={(checked) => {
+                    console.log('Checkbox changed:', checked, 'for reminder:', reminder.id);
+                    if (!isUsingDefaultReminders) {
+                      toggleReminder(reminder.id, reminder.completed);
+                    }
+                  }}
                   className="rounded border-primary"
-                  disabled={toggleReminderMutation.isPending}
+                  disabled={toggleReminderMutation.isPending || isUsingDefaultReminders}
                 />
                 <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
                   {reminder.text}
                 </span>
-                {reminders.length > 0 && (
+                {!isUsingDefaultReminders && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeReminder(reminder.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Remove button clicked for:', reminder.id);
+                      removeReminder(reminder.id);
+                    }}
                     className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
                     disabled={removeReminderMutation.isPending}
                   >
