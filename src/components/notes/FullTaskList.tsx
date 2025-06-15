@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,22 +10,25 @@ interface Task {
   text: string;
   completed: boolean;
   createdAt: Date;
+  linkedNotes?: string[];
 }
 
-export function FullTaskList() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState("");
+interface FullTaskListProps {
+  tasks: Task[];
+  setTasks: (tasks: Task[] | ((prev: Task[]) => Task[])) => void;
+}
 
-  const addTask = () => {
-    if (newTask.trim()) {
+export function FullTaskList({ tasks, setTasks }: FullTaskListProps) {
+  const addTask = (newTaskText: string) => {
+    if (newTaskText.trim()) {
       const task: Task = {
         id: Date.now().toString(),
-        text: newTask.trim(),
+        text: newTaskText.trim(),
         completed: false,
-        createdAt: new Date()
+        createdAt: new Date(),
+        linkedNotes: []
       };
       setTasks([task, ...tasks]);
-      setNewTask("");
     }
   };
 
@@ -40,12 +42,6 @@ export function FullTaskList() {
 
   const removeTask = (id: string) => {
     setTasks(tasks.filter(task => task.id !== id));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      addTask();
-    }
   };
 
   const completedTasks = tasks.filter(task => task.completed);
@@ -65,90 +61,28 @@ export function FullTaskList() {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
-        <Input
-          placeholder="Adicionar nova tarefa"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="bg-background border-0"
-        />
-        <Button onClick={addTask} size="icon">
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      <TaskInput onAddTask={addTask} />
 
       <div className="space-y-6">
         {/* Tarefas Pendentes */}
         {pendingTasks.length > 0 && (
-          <div>
-            <h3 className="font-medium text-sm text-muted-foreground mb-3 uppercase tracking-wide">
-              Pendentes ({pendingTasks.length})
-            </h3>
-            <div className="space-y-2">
-              {pendingTasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/20 transition-colors"
-                >
-                  <Checkbox
-                    checked={task.completed}
-                    onCheckedChange={() => toggleTask(task.id)}
-                  />
-                  <span className="flex-1 text-sm">
-                    {task.text}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {task.createdAt.toLocaleDateString('pt-BR')}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeTask(task.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TaskSection 
+            title={`Pendentes (${pendingTasks.length})`}
+            tasks={pendingTasks}
+            onToggle={toggleTask}
+            onRemove={removeTask}
+          />
         )}
 
         {/* Tarefas Concluídas */}
         {completedTasks.length > 0 && (
-          <div>
-            <h3 className="font-medium text-sm text-muted-foreground mb-3 uppercase tracking-wide">
-              Concluídas ({completedTasks.length})
-            </h3>
-            <div className="space-y-2">
-              {completedTasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-accent/30 border-accent/50"
-                >
-                  <Checkbox
-                    checked={task.completed}
-                    onCheckedChange={() => toggleTask(task.id)}
-                  />
-                  <span className="flex-1 text-sm line-through text-muted-foreground">
-                    {task.text}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {task.createdAt.toLocaleDateString('pt-BR')}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeTask(task.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TaskSection 
+            title={`Concluídas (${completedTasks.length})`}
+            tasks={completedTasks}
+            onToggle={toggleTask}
+            onRemove={removeTask}
+            isCompleted
+          />
         )}
 
         {tasks.length === 0 && (
@@ -164,5 +98,86 @@ export function FullTaskList() {
         )}
       </div>
     </Card>
+  );
+}
+
+interface TaskInputProps {
+  onAddTask: (text: string) => void;
+}
+
+function TaskInput({ onAddTask }: TaskInputProps) {
+  const [newTask, setNewTask] = useState("");
+
+  const handleSubmit = () => {
+    onAddTask(newTask);
+    setNewTask("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <div className="flex gap-2 mb-6">
+      <Input
+        placeholder="Adicionar nova tarefa"
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        onKeyPress={handleKeyPress}
+        className="bg-background border-0"
+      />
+      <Button onClick={handleSubmit} size="icon">
+        <Plus className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+interface TaskSectionProps {
+  title: string;
+  tasks: Task[];
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  isCompleted?: boolean;
+}
+
+function TaskSection({ title, tasks, onToggle, onRemove, isCompleted }: TaskSectionProps) {
+  return (
+    <div>
+      <h3 className="font-medium text-sm text-muted-foreground mb-3 uppercase tracking-wide">
+        {title}
+      </h3>
+      <div className="space-y-2">
+        {tasks.map((task) => (
+          <div 
+            key={task.id} 
+            className={`flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/20 transition-colors ${
+              isCompleted ? 'bg-accent/30 border-accent/50' : ''
+            }`}
+          >
+            <Checkbox
+              checked={task.completed}
+              onCheckedChange={() => onToggle(task.id)}
+            />
+            <span className={`flex-1 text-sm ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+              {task.text}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {task.createdAt.toLocaleDateString('pt-BR')}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(task.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

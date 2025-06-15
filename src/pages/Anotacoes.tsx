@@ -4,10 +4,28 @@ import { FullTaskList } from "@/components/notes/FullTaskList";
 import { NotesBlock } from "@/components/notes/NotesBlock";
 import { TaskNoteLinker } from "@/components/notes/TaskNoteLinker";
 
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: Date;
+  linkedNotes?: string[];
+}
+
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  links: string[];
+  linkedTasks?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const Anotacoes = () => {
   // Estados compartilhados para gerenciar vinculações
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [notes, setNotes] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
 
   const handleLinkTaskToNote = (taskId: string, noteId: string) => {
     // Adicionar noteId à lista de notas vinculadas da tarefa
@@ -60,10 +78,10 @@ const Anotacoes = () => {
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Lista de Tarefas Completa */}
-        <FullTaskList />
+        <FullTaskList tasks={tasks} setTasks={setTasks} />
         
         {/* Bloco de Notas */}
-        <NotesBlock />
+        <NotesBlock notes={notes} setNotes={setNotes} />
       </div>
 
       {/* Sistema de Vinculação entre Tarefas e Notas */}
