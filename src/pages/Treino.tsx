@@ -1,13 +1,20 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Heart, Activity, Droplets, Clock, Plus, Utensils } from "lucide-react";
+import { HealthMetricCard } from "@/components/health/HealthMetricCard";
+import { useToast } from "@/hooks/use-toast";
 
 const Treino = () => {
+  const { toast } = useToast();
+  
+  // Estados para métricas editáveis
+  const [weightData, setWeightData] = useState({ value: 70, goal: 65 });
+  const [waterData, setWaterData] = useState({ value: 1.5, goal: 2.5 });
+  const [exerciseData, setExerciseData] = useState({ value: 30, goal: 60 });
+  
   const [weight, setWeight] = useState(70);
   const [waterIntake, setWaterIntake] = useState(1.5);
   const [exerciseTime, setExerciseTime] = useState(30);
@@ -28,6 +35,31 @@ const Treino = () => {
 
   const [newExercise, setNewExercise] = useState({ name: "", duration: "" });
   const [newMeal, setNewMeal] = useState({ name: "", calories: "", protein: "", carbs: "", fat: "" });
+
+  // Funções para editar métricas
+  const updateWeightData = (value: number, goal: number) => {
+    setWeightData({ value, goal });
+    toast({
+      title: "Peso atualizado!",
+      description: `Valor atual: ${value}kg, Meta: ${goal}kg`,
+    });
+  };
+
+  const updateWaterData = (value: number, goal: number) => {
+    setWaterData({ value, goal });
+    toast({
+      title: "Ingestão de água atualizada!",
+      description: `Valor atual: ${value}L, Meta: ${goal}L`,
+    });
+  };
+
+  const updateExerciseData = (value: number, goal: number) => {
+    setExerciseData({ value, goal });
+    toast({
+      title: "Tempo de exercício atualizado!",
+      description: `Valor atual: ${value}min, Meta: ${goal}min`,
+    });
+  };
 
   const addExercise = () => {
     if (newExercise.name && newExercise.duration) {
@@ -54,53 +86,38 @@ const Treino = () => {
       <div className="space-y-2">
         <h1 className="font-display text-4xl font-bold">Saúde e Bem-estar</h1>
         <p className="text-muted-foreground">
-          Acompanhe seus treinos, nutrição e métricas de saúde.
+          Acompanhe seus treinos, nutrição e métricas de saúde. Clique no ícone de edição para personalizar suas metas.
         </p>
       </div>
 
-      {/* Métricas de Saúde */}
+      {/* Métricas de Saúde Editáveis */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Activity className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Peso</h3>
-            </div>
-            <div className="text-3xl font-bold mb-2">{weight} kg</div>
-            <Progress value={(weight / 100) * 100} className="mb-2" />
-            <p className="text-sm text-muted-foreground">Meta: 65 kg</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Droplets className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Ingestão de Água</h3>
-            </div>
-            <div className="text-3xl font-bold mb-2">{waterIntake} L</div>
-            <Progress value={(waterIntake / 3) * 100} className="mb-2" />
-            <p className="text-sm text-muted-foreground">Meta: 2.5 L</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Clock className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Exercícios</h3>
-            </div>
-            <div className="text-3xl font-bold mb-2">{exerciseTime} min</div>
-            <Progress value={(exerciseTime / 60) * 100} className="mb-2" />
-            <p className="text-sm text-muted-foreground">Meta: 60 min</p>
-          </CardContent>
-        </Card>
+        <HealthMetricCard
+          title="Peso"
+          value={weightData.value}
+          unit="kg"
+          goal={weightData.goal}
+          icon={<Activity className="h-6 w-6 text-primary" />}
+          onEdit={updateWeightData}
+        />
+        
+        <HealthMetricCard
+          title="Ingestão de Água"
+          value={waterData.value}
+          unit="L"
+          goal={waterData.goal}
+          icon={<Droplets className="h-6 w-6 text-primary" />}
+          onEdit={updateWaterData}
+        />
+        
+        <HealthMetricCard
+          title="Exercícios"
+          value={exerciseData.value}
+          unit="min"
+          goal={exerciseData.goal}
+          icon={<Clock className="h-6 w-6 text-primary" />}
+          onEdit={updateExerciseData}
+        />
       </div>
 
       {/* Tabs para Exercícios e Nutrição */}
