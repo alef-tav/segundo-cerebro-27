@@ -78,9 +78,9 @@ const Index = () => {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/anotacoes')}
+              onClick={() => navigate('/conhecimento')}
             >
-              Criar Nota
+              Adicionar Conhecimento
             </Button>
           </div>
         </Card>
