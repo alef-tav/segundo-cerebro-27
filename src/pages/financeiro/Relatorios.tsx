@@ -2,49 +2,70 @@
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
 import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
 import { useFinancialContext } from "@/contexts/FinancialContext";
+import { useFinancialTransactions } from "@/hooks/useFinancialTransactions";
+import { useFinancialAccounts } from "@/hooks/useFinancialAccounts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart3, TrendingUp, TrendingDown, PieChart, Download } from "lucide-react";
+import { BarChart3, TrendingUp, TrendingDown, PieChart, Download, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { useMemo } from "react";
 
 export default function Relatorios() {
   const { financialType } = useFinancialContext();
+  
+  const { receitas, despesas, isLoading: transactionsLoading } = useFinancialTransactions(financialType);
+  const { accounts, isLoading: accountsLoading } = useFinancialAccounts(financialType);
 
-  const dadosPessoais = {
-    receitas: 25000.00,
-    despesas: 18500.00,
-    economia: 6500.00,
-    variacaoReceitas: 12,
-    variacaoDespesas: 5,
-    variacaoEconomia: 25,
-    categorias: [
-      { categoria: "Alimentação", valor: 4500, percentual: 24, cor: "bg-red-500" },
-      { categoria: "Transporte", valor: 3200, percentual: 17, cor: "bg-blue-500" },
-      { categoria: "Casa", valor: 2800, percentual: 15, cor: "bg-green-500" },
-      { categoria: "Lazer", valor: 2100, percentual: 11, cor: "bg-purple-500" },
-      { categoria: "Saúde", valor: 1900, percentual: 10, cor: "bg-orange-500" },
-    ]
-  };
+  // Calcular totais reais
+  const dadosReais = useMemo(() => {
+    const totalReceitas = receitas.reduce((total, receita) => total + receita.valor, 0);
+    const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
+    const saldoTotal = totalReceitas - totalDespesas;
 
-  const dadosEmpresariais = {
-    receitas: 120000.00,
-    despesas: 85000.00,
-    economia: 35000.00,
-    variacaoReceitas: 18,
-    variacaoDespesas: 8,
-    variacaoEconomia: 45,
-    categorias: [
-      { categoria: "Fornecedores", valor: 35000, percentual: 41, cor: "bg-red-500" },
-      { categoria: "Salários", valor: 25000, percentual: 29, cor: "bg-blue-500" },
-      { categoria: "Marketing", valor: 12000, percentual: 14, cor: "bg-green-500" },
-      { categoria: "Escritório", valor: 8000, percentual: 9, cor: "bg-purple-500" },
-      { categoria: "Impostos", valor: 5000, percentual: 6, cor: "bg-orange-500" },
-    ]
-  };
+    // Calcular categorias de despesas
+    const categoriasDespesas = despesas.reduce((acc, despesa) => {
+      if (!acc[despesa.categoria]) {
+        acc[despesa.categoria] = 0;
+      }
+      acc[despesa.categoria] += despesa.valor;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const dados = financialType === 'pessoal' ? dadosPessoais : dadosEmpresariais;
+    const categoriasFormatadas = Object.entries(categoriasDespesas).map(([categoria, valor], index) => {
+      const cores = ["bg-red-500", "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-yellow-500"];
+      const percentual = totalDespesas > 0 ? Math.round((valor / totalDespesas) * 100) : 0;
+      
+      return {
+        categoria,
+        valor,
+        percentual,
+        cor: cores[index % cores.length]
+      };
+    }).sort((a, b) => b.valor - a.valor);
+
+    return {
+      receitas: totalReceitas,
+      despesas: totalDespesas,
+      economia: saldoTotal,
+      variacaoReceitas: 0, // Placeholder - seria calculado comparando com período anterior
+      variacaoDespesas: 0, // Placeholder - seria calculado comparando com período anterior
+      variacaoEconomia: 0, // Placeholder - seria calculado comparando com período anterior
+      categorias: categoriasFormatadas
+    };
+  }, [receitas, despesas]);
+
   const titulo = financialType === 'pessoal' ? 'Relatórios Pessoais' : 'Relatórios Empresariais';
+
+  if (transactionsLoading || accountsLoading) {
+    return (
+      <FinancialLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </FinancialLayout>
+    );
+  }
 
   return (
     <FinancialLayout>
@@ -86,11 +107,13 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Receitas do Mês' : 'Faturamento do Mês'}</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(dados.receitas)}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +{dados.variacaoReceitas}% vs mês anterior
-                </p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(dadosReais.receitas)}</p>
+                {dadosReais.variacaoReceitas !== 0 && (
+                  <p className="text-sm text-green-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +{dadosReais.variacaoReceitas}% vs mês anterior
+                  </p>
+                )}
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-green-600" />
@@ -102,11 +125,13 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Despesas do Mês' : 'Custos do Mês'}</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(dados.despesas)}</p>
-                <p className="text-sm text-red-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +{dados.variacaoDespesas}% vs mês anterior
-                </p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(dadosReais.despesas)}</p>
+                {dadosReais.variacaoDespesas !== 0 && (
+                  <p className="text-sm text-red-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +{dadosReais.variacaoDespesas}% vs mês anterior
+                  </p>
+                )}
               </div>
               <div className="p-3 bg-red-100 rounded-lg">
                 <TrendingDown className="h-6 w-6 text-red-600" />
@@ -118,11 +143,15 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Economia do Mês' : 'Lucro do Mês'}</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(dados.economia)}</p>
-                <p className="text-sm text-blue-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +{dados.variacaoEconomia}% vs mês anterior
+                <p className={`text-2xl font-bold ${dadosReais.economia >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                  {formatCurrency(dadosReais.economia)}
                 </p>
+                {dadosReais.variacaoEconomia !== 0 && (
+                  <p className="text-sm text-blue-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +{dadosReais.variacaoEconomia}% vs mês anterior
+                  </p>
+                )}
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <BarChart3 className="h-6 w-6 text-blue-600" />
@@ -149,7 +178,24 @@ export default function Relatorios() {
               {financialType === 'pessoal' ? 'Despesas por Categoria' : 'Custos por Categoria'}
             </h3>
             <div className="h-64 flex items-center justify-center text-muted-foreground">
-              Gráfico de pizza das categorias de {financialType === 'pessoal' ? 'despesas pessoais' : 'custos empresariais'}
+              {dadosReais.categorias.length > 0 ? (
+                <div className="w-full">
+                  <p className="text-center mb-4">Distribuição das categorias:</p>
+                  <div className="space-y-2">
+                    {dadosReais.categorias.slice(0, 5).map((item, index) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${item.cor}`} />
+                          <span>{item.categoria}</span>
+                        </div>
+                        <span>{item.percentual}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                'Nenhuma despesa encontrada para gerar o gráfico'
+              )}
             </div>
           </Card>
         </div>
@@ -158,18 +204,26 @@ export default function Relatorios() {
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Análise por Categoria - {titulo}</h3>
           <div className="space-y-4">
-            {dados.categorias.map((item, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${item.cor}`} />
-                  <span className="font-medium">{item.categoria}</span>
+            {dadosReais.categorias.length > 0 ? (
+              dadosReais.categorias.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${item.cor}`} />
+                    <span className="font-medium">{item.categoria}</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-muted-foreground">{item.percentual}%</span>
+                    <span className="font-semibold">{formatCurrency(item.valor)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-muted-foreground">{item.percentual}%</span>
-                  <span className="font-semibold">{formatCurrency(item.valor)}</span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <PieChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhuma despesa encontrada</p>
+                <p className="text-sm">Adicione algumas despesas para ver a análise por categoria</p>
               </div>
-            ))}
+            )}
           </div>
         </Card>
       </div>
