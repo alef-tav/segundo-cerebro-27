@@ -141,7 +141,6 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   const removeReminderMutation = useMutation({
     mutationFn: async (id: string) => {
       console.log('🗑️ ATTEMPTING TO REMOVE reminder with ID:', id);
-      console.log('🔍 Current user authentication check...');
       
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) {
@@ -161,17 +160,15 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .from('reminders')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id) // Extra security check
+        .eq('user_id', user.id)
         .select();
 
       if (error) {
         console.error('💥 Error removing reminder:', error);
-        console.error('💥 Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
       
       console.log('✅ Remove successful, deleted data:', data);
-      console.log('📊 Number of rows affected:', data?.length || 0);
       
       if (!data || data.length === 0) {
         console.warn('⚠️ No rows were deleted - reminder may not exist or belong to another user');
@@ -211,23 +208,6 @@ export function RemindersSection({ className }: RemindersSectionProps) {
 
   const removeReminder = (id: string) => {
     console.log('🗑️ removeReminder button clicked for ID:', id);
-    console.log('📋 All current reminders:', reminders);
-    console.log('🔍 Looking for reminder with this ID in current list...');
-    
-    const reminderToDelete = reminders.find(r => r.id === id);
-    console.log('🎯 Found reminder to delete:', reminderToDelete);
-    
-    if (!reminderToDelete) {
-      console.error('❌ Reminder not found in current list!');
-      toast({
-        title: "Erro",
-        description: "Lembrete não encontrado na lista atual",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    console.log('▶️ Calling removeReminderMutation.mutate with ID:', id);
     removeReminderMutation.mutate(id);
   };
 
@@ -247,6 +227,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     { id: "default-3", text: "Responder Emails Pendentes", completed: false, createdAt: new Date() },
   ];
 
+  // CORREÇÃO: Usar apenas lembretes do usuário se existirem, senão mostrar padrões
   const hasUserReminders = reminders.length > 0;
   const displayReminders = hasUserReminders ? reminders : defaultReminders;
 
@@ -255,7 +236,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     remindersCount: reminders.length,
     displayRemindersCount: displayReminders.length,
     isLoading,
-    reminders: reminders.map(r => ({ id: r.id, text: r.text }))
+    displayedReminders: displayReminders.map(r => ({ id: r.id, text: r.text }))
   });
 
   return (
@@ -318,15 +299,15 @@ export function RemindersSection({ className }: RemindersSectionProps) {
             </div>
           ) : (
             displayReminders.map((reminder, index) => {
+              // CORREÇÃO: Se há lembretes do usuário, todos são editáveis. Se não há, nenhum é editável.
               const isUserReminder = hasUserReminders;
-              const showDeleteButton = isUserReminder;
               
               console.log('🔍 Rendering reminder:', {
                 id: reminder.id,
                 text: reminder.text,
                 isUserReminder,
-                showDeleteButton,
-                hasUserReminders
+                hasUserReminders,
+                index
               });
               
               return (
@@ -358,8 +339,8 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                   <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
                     {reminder.text}
                   </span>
-                  {/* Botão de remover - só aparece para lembretes salvos do usuário */}
-                  {showDeleteButton && (
+                  {/* Botão de remover - só aparece para lembretes do usuário */}
+                  {isUserReminder && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -369,7 +350,6 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                         console.log('🗑️ Delete button clicked for reminder:', {
                           id: reminder.id,
                           text: reminder.text,
-                          showDeleteButton,
                           isUserReminder
                         });
                         removeReminder(reminder.id);
