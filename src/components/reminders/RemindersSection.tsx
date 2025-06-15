@@ -30,8 +30,14 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   const { data: reminders = [], isLoading } = useQuery({
     queryKey: ['reminders'],
     queryFn: async () => {
+      console.log('Fetching reminders...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      console.log('Current user:', user?.id);
+      
+      if (!user) {
+        console.log('No user authenticated, returning empty array');
+        return [];
+      }
 
       const { data, error } = await supabase
         .from('reminders')
@@ -44,6 +50,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         throw error;
       }
 
+      console.log('Fetched reminders:', data);
       return data.map((reminder: any) => ({
         id: reminder.id,
         text: reminder.text,
@@ -56,6 +63,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Adicionar lembrete
   const addReminderMutation = useMutation({
     mutationFn: async (text: string) => {
+      console.log('Adding reminder:', text);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
@@ -73,6 +81,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         console.error('Error adding reminder:', error);
         throw error;
       }
+      console.log('Added reminder:', data);
       return data;
     },
     onSuccess: () => {
@@ -97,7 +106,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Marcar lembrete como concluído/não concluído
   const toggleReminderMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      console.log('Executing toggle mutation for:', id, 'setting completed to:', completed);
+      console.log('Toggling reminder:', id, 'to completed:', completed);
       
       const { data, error } = await supabase
         .from('reminders')
@@ -110,11 +119,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         throw error;
       }
       
-      console.log('Toggle mutation successful:', data);
+      console.log('Toggle successful:', data);
       return data;
     },
     onSuccess: () => {
-      console.log('Toggle mutation completed successfully');
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
     },
     onError: (error) => {
@@ -130,7 +138,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Remover lembrete
   const removeReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Executing remove mutation for:', id);
+      console.log('Removing reminder with ID:', id);
       
       const { data, error } = await supabase
         .from('reminders')
@@ -143,11 +151,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         throw error;
       }
       
-      console.log('Remove mutation successful:', data);
+      console.log('Remove successful:', data);
       return data;
     },
     onSuccess: () => {
-      console.log('Remove mutation completed successfully');
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       toast({
         title: "Lembrete removido",
@@ -171,12 +178,12 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   };
 
   const toggleReminder = (id: string, currentCompleted: boolean) => {
-    console.log('toggleReminder called:', { id, currentCompleted, newCompleted: !currentCompleted });
+    console.log('toggleReminder called for ID:', id, 'current:', currentCompleted);
     toggleReminderMutation.mutate({ id, completed: !currentCompleted });
   };
 
   const removeReminder = (id: string) => {
-    console.log('removeReminder called:', id);
+    console.log('removeReminder called for ID:', id);
     removeReminderMutation.mutate(id);
   };
 
@@ -189,15 +196,21 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     }
   };
 
-  // Se não estiver autenticado, mostrar lembretes padrão
+  // Lembretes padrão apenas quando não há lembretes do usuário
   const defaultReminders = [
-    { id: "1", text: "Baixar o app da Central Caverna", completed: false, createdAt: new Date() },
-    { id: "2", text: "Pagar Internet", completed: false, createdAt: new Date() },
-    { id: "3", text: "Responder Emails Pendentes", completed: false, createdAt: new Date() },
+    { id: "default-1", text: "Baixar o app da Central Caverna", completed: false, createdAt: new Date() },
+    { id: "default-2", text: "Pagar Internet", completed: false, createdAt: new Date() },
+    { id: "default-3", text: "Responder Emails Pendentes", completed: false, createdAt: new Date() },
   ];
 
-  const displayReminders = reminders.length > 0 ? reminders : defaultReminders;
-  const isUsingDefaultReminders = reminders.length === 0;
+  const hasUserReminders = reminders.length > 0;
+  const displayReminders = hasUserReminders ? reminders : defaultReminders;
+
+  console.log('Display state:', {
+    hasUserReminders,
+    remindersCount: reminders.length,
+    displayRemindersCount: displayReminders.length
+  });
 
   return (
     <Card className={`p-6 bg-secondary border-0 ${className}`}>
@@ -270,31 +283,32 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                 <Checkbox
                   checked={reminder.completed}
                   onCheckedChange={(checked) => {
-                    console.log('Checkbox onCheckedChange triggered:', { 
-                      reminderId: reminder.id, 
-                      checked, 
-                      currentCompleted: reminder.completed,
-                      isUsingDefaultReminders 
+                    console.log('Checkbox clicked:', {
+                      id: reminder.id,
+                      checked,
+                      hasUserReminders
                     });
                     
-                    if (!isUsingDefaultReminders) {
+                    // Só permite alteração se for lembrete do usuário
+                    if (hasUserReminders) {
                       toggleReminder(reminder.id, reminder.completed);
                     }
                   }}
                   className="rounded border-primary"
-                  disabled={toggleReminderMutation.isPending || isUsingDefaultReminders}
+                  disabled={toggleReminderMutation.isPending || !hasUserReminders}
                 />
                 <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
                   {reminder.text}
                 </span>
-                {!isUsingDefaultReminders && (
+                {/* Botão de remover - só aparece para lembretes salvos do usuário */}
+                {hasUserReminders && (
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Remove button onClick triggered:', reminder.id);
+                      console.log('Remove button clicked for ID:', reminder.id);
                       removeReminder(reminder.id);
                     }}
                     className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
@@ -307,10 +321,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
             ))
           )}
 
-          {!isLoading && reminders.length === 0 && !isAdding && (
+          {!isLoading && !hasUserReminders && !isAdding && (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground">
-                Nenhum lembrete adicionado
+                {reminders.length === 0 ? "Nenhum lembrete adicionado" : "Carregando lembretes..."}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Clique em "Novo" para adicionar
