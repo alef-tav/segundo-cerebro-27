@@ -39,7 +39,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reminders:', error);
+        throw error;
+      }
 
       return data.map((reminder: any) => ({
         id: reminder.id,
@@ -66,7 +69,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding reminder:', error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -78,7 +84,8 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         description: "Seu lembrete foi salvo com sucesso!",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error in addReminderMutation:', error);
       toast({
         title: "Erro",
         description: "Não foi possível adicionar o lembrete. Tente novamente.",
@@ -90,36 +97,65 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Marcar lembrete como concluído/não concluído
   const toggleReminderMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      const { error } = await supabase
+      console.log('Executing toggle mutation for:', id, 'setting completed to:', completed);
+      
+      const { data, error } = await supabase
         .from('reminders')
         .update({ completed })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error toggling reminder:', error);
+        throw error;
+      }
+      
+      console.log('Toggle mutation successful:', data);
+      return data;
     },
     onSuccess: () => {
+      console.log('Toggle mutation completed successfully');
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+    onError: (error) => {
+      console.error('Error in toggleReminderMutation:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o lembrete. Tente novamente.",
+        variant: "destructive",
+      });
     }
   });
 
   // Remover lembrete
   const removeReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      console.log('Executing remove mutation for:', id);
+      
+      const { data, error } = await supabase
         .from('reminders')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error removing reminder:', error);
+        throw error;
+      }
+      
+      console.log('Remove mutation successful:', data);
+      return data;
     },
     onSuccess: () => {
+      console.log('Remove mutation completed successfully');
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       toast({
         title: "Lembrete removido",
         description: "Seu lembrete foi removido com sucesso!",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error in removeReminderMutation:', error);
       toast({
         title: "Erro",
         description: "Não foi possível remover o lembrete. Tente novamente.",
@@ -134,13 +170,13 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     }
   };
 
-  const toggleReminder = (id: string, completed: boolean) => {
-    console.log('Toggling reminder:', id, 'current completed:', completed, 'new completed:', !completed);
-    toggleReminderMutation.mutate({ id, completed: !completed });
+  const toggleReminder = (id: string, currentCompleted: boolean) => {
+    console.log('toggleReminder called:', { id, currentCompleted, newCompleted: !currentCompleted });
+    toggleReminderMutation.mutate({ id, completed: !currentCompleted });
   };
 
   const removeReminder = (id: string) => {
-    console.log('Removing reminder:', id);
+    console.log('removeReminder called:', id);
     removeReminderMutation.mutate(id);
   };
 
@@ -234,7 +270,13 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                 <Checkbox
                   checked={reminder.completed}
                   onCheckedChange={(checked) => {
-                    console.log('Checkbox changed:', checked, 'for reminder:', reminder.id);
+                    console.log('Checkbox onCheckedChange triggered:', { 
+                      reminderId: reminder.id, 
+                      checked, 
+                      currentCompleted: reminder.completed,
+                      isUsingDefaultReminders 
+                    });
+                    
                     if (!isUsingDefaultReminders) {
                       toggleReminder(reminder.id, reminder.completed);
                     }
@@ -252,7 +294,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Remove button clicked for:', reminder.id);
+                      console.log('Remove button onClick triggered:', reminder.id);
                       removeReminder(reminder.id);
                     }}
                     className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
