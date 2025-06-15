@@ -113,10 +113,18 @@ const Mindfulness = () => {
               <div className="relative">
                 <div 
                   onClick={handlePlayPause}
-                  className="text-6xl font-mono font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex flex-col items-center justify-center p-8 rounded-full bg-primary/10 hover:bg-primary/20 border-2 border-primary/20 hover:border-primary/40"
+                  className="relative text-6xl font-mono font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex flex-col items-center justify-center p-8 rounded-full bg-primary/10 hover:bg-primary/20 border-2 border-primary/20 hover:border-primary/40"
                 >
                   <Timer className="h-8 w-8 text-primary mb-2" />
                   {formatTime(meditationTime)}
+                  {/* Ícone de Play/Pause centralizado */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {isPlaying ? (
+                      <Pause className="h-12 w-12 text-primary/60" />
+                    ) : (
+                      <Play className="h-12 w-12 text-primary/60" />
+                    )}
+                  </div>
                 </div>
               </div>
               
