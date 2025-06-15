@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -25,6 +25,41 @@ const Mindfulness = () => {
   const [monthlyGoal] = useState(300); // 300 minutos por mês
   const [monthlyProgress] = useState(180); // 180 minutos este mês
 
+  // Timer para meditação
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isPlaying && meditationTime < totalMeditationTime) {
+      interval = setInterval(() => {
+        setMeditationTime(prev => {
+          if (prev >= totalMeditationTime) {
+            setIsPlaying(false);
+            return totalMeditationTime;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    
+    return () => clearInterval(interval);
+  }, [isPlaying, meditationTime, totalMeditationTime]);
+
+  // Timer para respiração
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isBreathing) {
+      const breathDuration = 60000 / breathingRate[0]; // duração em ms por respiração
+      const halfDuration = breathDuration / 2; // metade para inspire, metade para expire
+      
+      interval = setInterval(() => {
+        setBreathPhase(prev => prev === "inspire" ? "expire" : "inspire");
+      }, halfDuration);
+    }
+    
+    return () => clearInterval(interval);
+  }, [isBreathing, breathingRate]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -37,6 +72,22 @@ const Mindfulness = () => {
 
   const handleBreathingToggle = () => {
     setIsBreathing(!isBreathing);
+    if (!isBreathing) {
+      setBreathPhase("inspire");
+    }
+  };
+
+  const handleSkipBack = () => {
+    setMeditationTime(Math.max(0, meditationTime - 10));
+  };
+
+  const handleSkipForward = () => {
+    setMeditationTime(Math.min(totalMeditationTime, meditationTime + 10));
+  };
+
+  const handleReset = () => {
+    setIsPlaying(false);
+    setMeditationTime(0);
   };
 
   return (
@@ -70,7 +121,7 @@ const Mindfulness = () => {
               />
               
               <div className="flex items-center justify-center space-x-4">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={handleSkipBack}>
                   <SkipBack className="h-4 w-4" />
                 </Button>
                 <Button 
@@ -84,13 +135,24 @@ const Mindfulness = () => {
                     <Play className="h-6 w-6" />
                   )}
                 </Button>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={handleSkipForward}>
                   <SkipForward className="h-4 w-4" />
                 </Button>
               </div>
               
+              <div className="flex justify-center space-x-2">
+                <Button variant="outline" size="sm" onClick={handleReset}>
+                  Reset
+                </Button>
+              </div>
+              
               <p className="text-sm text-muted-foreground">
-                Pressione play para iniciar a meditação
+                {meditationTime >= totalMeditationTime 
+                  ? "Meditação concluída! 🧘‍♀️" 
+                  : isPlaying 
+                    ? "Meditação em andamento..." 
+                    : "Pressione play para iniciar a meditação"
+                }
               </p>
             </div>
           </div>
@@ -108,8 +170,8 @@ const Mindfulness = () => {
 
             <div className="text-center space-y-6">
               <div className="relative">
-                <div className={`w-32 h-32 mx-auto rounded-full bg-primary/20 flex items-center justify-center transition-all duration-4000 ${
-                  isBreathing ? 'scale-125 bg-primary/30' : 'scale-100'
+                <div className={`w-32 h-32 mx-auto rounded-full bg-primary/20 flex items-center justify-center transition-all duration-1000 ${
+                  isBreathing && breathPhase === "inspire" ? 'scale-125 bg-primary/30' : 'scale-100'
                 }`}>
                   <Wind className="h-12 w-12 text-primary" />
                 </div>
@@ -117,7 +179,12 @@ const Mindfulness = () => {
               
               <div className="space-y-2">
                 <p className="text-lg font-medium">
-                  {isBreathing ? 'Inspire... e expire...' : 'Pronto para começar?'}
+                  {isBreathing 
+                    ? breathPhase === "inspire" 
+                      ? "Inspire..." 
+                      : "Expire..." 
+                    : "Pronto para começar?"
+                  }
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Taxa de Respiração: {breathingRate[0]} respirações/min
