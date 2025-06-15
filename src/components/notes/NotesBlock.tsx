@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Pencil, Plus, X, Edit3 } from "lucide-react";
+import { Pencil, Plus, X, Edit3, Link, ExternalLink } from "lucide-react";
 
 interface Note {
   id: string;
   title: string;
   content: string;
+  links: string[];
+  linkedTasks: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,27 +22,47 @@ export function NotesBlock() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [newLinks, setNewLinks] = useState<string[]>([""]);
+
+  const addLinkField = () => {
+    setNewLinks([...newLinks, ""]);
+  };
+
+  const updateLinkField = (index: number, value: string) => {
+    const updatedLinks = [...newLinks];
+    updatedLinks[index] = value;
+    setNewLinks(updatedLinks);
+  };
+
+  const removeLinkField = (index: number) => {
+    const updatedLinks = newLinks.filter((_, i) => i !== index);
+    setNewLinks(updatedLinks);
+  };
 
   const createNote = () => {
     if (newTitle.trim() || newContent.trim()) {
+      const validLinks = newLinks.filter(link => link.trim() !== "");
       const note: Note = {
         id: Date.now().toString(),
         title: newTitle.trim() || "Nota sem título",
         content: newContent.trim(),
+        links: validLinks,
+        linkedTasks: [],
         createdAt: new Date(),
         updatedAt: new Date()
       };
       setNotes([note, ...notes]);
       setNewTitle("");
       setNewContent("");
+      setNewLinks([""]);
       setIsCreating(false);
     }
   };
 
-  const updateNote = (id: string, title: string, content: string) => {
+  const updateNote = (id: string, title: string, content: string, links: string[]) => {
     setNotes(notes.map(note => 
       note.id === id 
-        ? { ...note, title, content, updatedAt: new Date() }
+        ? { ...note, title, content, links, updatedAt: new Date() }
         : note
     ));
     setEditingId(null);
@@ -55,6 +77,7 @@ export function NotesBlock() {
     setEditingId(null);
     setNewTitle("");
     setNewContent("");
+    setNewLinks([""]);
   };
 
   return (
@@ -98,6 +121,43 @@ export function NotesBlock() {
                 onChange={(e) => setNewContent(e.target.value)}
                 className="bg-background border-0 min-h-[100px]"
               />
+              
+              {/* Campo de Links */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Link className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Links</span>
+                  <Button 
+                    onClick={addLinkField} 
+                    size="sm" 
+                    variant="outline"
+                    className="h-6"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+                {newLinks.map((link, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      placeholder="https://exemplo.com"
+                      value={link}
+                      onChange={(e) => updateLinkField(index, e.target.value)}
+                      className="bg-background border-0"
+                    />
+                    {newLinks.length > 1 && (
+                      <Button
+                        onClick={() => removeLinkField(index)}
+                        size="icon"
+                        variant="ghost"
+                        className="h-10 w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
               <div className="flex gap-2">
                 <Button onClick={createNote} size="sm">
                   Salvar
@@ -117,7 +177,7 @@ export function NotesBlock() {
             note={note}
             isEditing={editingId === note.id}
             onEdit={() => setEditingId(note.id)}
-            onSave={(title, content) => updateNote(note.id, title, content)}
+            onSave={(title, content, links) => updateNote(note.id, title, content, links)}
             onCancel={() => setEditingId(null)}
             onDelete={() => deleteNote(note.id)}
           />
@@ -143,7 +203,7 @@ interface NoteCardProps {
   note: Note;
   isEditing: boolean;
   onEdit: () => void;
-  onSave: (title: string, content: string) => void;
+  onSave: (title: string, content: string, links: string[]) => void;
   onCancel: () => void;
   onDelete: () => void;
 }
@@ -151,15 +211,41 @@ interface NoteCardProps {
 function NoteCard({ note, isEditing, onEdit, onSave, onCancel, onDelete }: NoteCardProps) {
   const [editTitle, setEditTitle] = useState(note.title);
   const [editContent, setEditContent] = useState(note.content);
+  const [editLinks, setEditLinks] = useState<string[]>(note.links.length > 0 ? note.links : [""]);
+
+  const addLinkField = () => {
+    setEditLinks([...editLinks, ""]);
+  };
+
+  const updateLinkField = (index: number, value: string) => {
+    const updatedLinks = [...editLinks];
+    updatedLinks[index] = value;
+    setEditLinks(updatedLinks);
+  };
+
+  const removeLinkField = (index: number) => {
+    const updatedLinks = editLinks.filter((_, i) => i !== index);
+    setEditLinks(updatedLinks);
+  };
 
   const handleSave = () => {
-    onSave(editTitle, editContent);
+    const validLinks = editLinks.filter(link => link.trim() !== "");
+    onSave(editTitle, editContent, validLinks);
   };
 
   const handleCancel = () => {
     setEditTitle(note.title);
     setEditContent(note.content);
+    setEditLinks(note.links.length > 0 ? note.links : [""]);
     onCancel();
+  };
+
+  const openLink = (url: string) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      window.open(url, '_blank');
+    } else {
+      window.open(`https://${url}`, '_blank');
+    }
   };
 
   if (isEditing) {
@@ -176,6 +262,43 @@ function NoteCard({ note, isEditing, onEdit, onSave, onCancel, onDelete }: NoteC
             onChange={(e) => setEditContent(e.target.value)}
             className="bg-background border-0 min-h-[100px]"
           />
+          
+          {/* Campo de Links na edição */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Link className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Links</span>
+              <Button 
+                onClick={addLinkField} 
+                size="sm" 
+                variant="outline"
+                className="h-6"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+            {editLinks.map((link, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  placeholder="https://exemplo.com"
+                  value={link}
+                  onChange={(e) => updateLinkField(index, e.target.value)}
+                  className="bg-background border-0"
+                />
+                {editLinks.length > 1 && (
+                  <Button
+                    onClick={() => removeLinkField(index)}
+                    size="icon"
+                    variant="ghost"
+                    className="h-10 w-10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+
           <div className="flex gap-2">
             <Button onClick={handleSave} size="sm">
               Salvar
@@ -205,6 +328,31 @@ function NoteCard({ note, isEditing, onEdit, onSave, onCancel, onDelete }: NoteC
       <p className="text-sm text-muted-foreground mb-3 whitespace-pre-wrap">
         {note.content}
       </p>
+      
+      {/* Exibir Links */}
+      {note.links.length > 0 && (
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Link className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Links</span>
+          </div>
+          <div className="space-y-1">
+            {note.links.map((link, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => openLink(link)}
+                className="flex items-center gap-2 h-8 text-xs"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {link.length > 30 ? `${link.substring(0, 30)}...` : link}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center text-xs text-muted-foreground">
         <span>Criado em {note.createdAt.toLocaleDateString('pt-BR')}</span>
         {note.updatedAt.getTime() !== note.createdAt.getTime() && (
