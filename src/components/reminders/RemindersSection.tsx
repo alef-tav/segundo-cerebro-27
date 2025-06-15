@@ -220,23 +220,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     }
   };
 
-  // Lembretes padrão apenas quando não há lembretes do usuário
-  const defaultReminders = [
-    { id: "default-1", text: "Baixar o app da Central Caverna", completed: false, createdAt: new Date() },
-    { id: "default-2", text: "Pagar Internet", completed: false, createdAt: new Date() },
-    { id: "default-3", text: "Responder Emails Pendentes", completed: false, createdAt: new Date() },
-  ];
-
-  // CORREÇÃO: Usar apenas lembretes do usuário se existirem, senão mostrar padrões
-  const hasUserReminders = reminders.length > 0;
-  const displayReminders = hasUserReminders ? reminders : defaultReminders;
-
   console.log('📊 Component render state:', {
-    hasUserReminders,
     remindersCount: reminders.length,
-    displayRemindersCount: displayReminders.length,
     isLoading,
-    displayedReminders: displayReminders.map(r => ({ id: r.id, text: r.text }))
+    displayedReminders: reminders.map(r => ({ id: r.id, text: r.text }))
   });
 
   return (
@@ -297,16 +284,20 @@ export function RemindersSection({ className }: RemindersSectionProps) {
             <div className="text-center py-4">
               <p className="text-sm text-muted-foreground">Carregando lembretes...</p>
             </div>
+          ) : reminders.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground">
+                Nenhum lembrete encontrado
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Clique em "Novo" para adicionar
+              </p>
+            </div>
           ) : (
-            displayReminders.map((reminder, index) => {
-              // CORREÇÃO: Se há lembretes do usuário, todos são editáveis. Se não há, nenhum é editável.
-              const isUserReminder = hasUserReminders;
-              
+            reminders.map((reminder, index) => {
               console.log('🔍 Rendering reminder:', {
                 id: reminder.id,
                 text: reminder.text,
-                isUserReminder,
-                hasUserReminders,
                 index
               });
               
@@ -324,57 +315,38 @@ export function RemindersSection({ className }: RemindersSectionProps) {
                     onCheckedChange={(checked) => {
                       console.log('☑️ Checkbox clicked:', {
                         id: reminder.id,
-                        checked,
-                        isUserReminder
+                        checked
                       });
                       
-                      // Só permite alteração se for lembrete do usuário
-                      if (isUserReminder) {
-                        toggleReminder(reminder.id, reminder.completed);
-                      }
+                      toggleReminder(reminder.id, reminder.completed);
                     }}
                     className="rounded border-primary"
-                    disabled={toggleReminderMutation.isPending || !isUserReminder}
+                    disabled={toggleReminderMutation.isPending}
                   />
                   <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
                     {reminder.text}
                   </span>
-                  {/* Botão de remover - só aparece para lembretes do usuário */}
-                  {isUserReminder && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🗑️ Delete button clicked for reminder:', {
-                          id: reminder.id,
-                          text: reminder.text,
-                          isUserReminder
-                        });
-                        removeReminder(reminder.id);
-                      }}
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                      disabled={removeReminderMutation.isPending}
-                      title={`Remover: ${reminder.text}`}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🗑️ Delete button clicked for reminder:', {
+                        id: reminder.id,
+                        text: reminder.text
+                      });
+                      removeReminder(reminder.id);
+                    }}
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                    disabled={removeReminderMutation.isPending}
+                    title={`Remover: ${reminder.text}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
                 </div>
               );
             })
-          )}
-
-          {!isLoading && displayReminders.length === 0 && (
-            <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">
-                Nenhum lembrete encontrado
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Clique em "Novo" para adicionar
-              </p>
-            </div>
           )}
         </div>
       </div>
