@@ -117,12 +117,12 @@ const Mindfulness = () => {
                 >
                   <Timer className="h-8 w-8 text-primary mb-2" />
                   {formatTime(meditationTime)}
-                  {/* Ícone de Play/Pause centralizado */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Ícone de Play/Pause dentro do círculo */}
+                  <div className="absolute bottom-4">
                     {isPlaying ? (
-                      <Pause className="h-12 w-12 text-primary/60" />
+                      <Pause className="h-8 w-8 text-primary" />
                     ) : (
-                      <Play className="h-12 w-12 text-primary/60" />
+                      <Play className="h-8 w-8 text-primary" />
                     )}
                   </div>
                 </div>
@@ -132,26 +132,6 @@ const Mindfulness = () => {
                 value={(meditationTime / totalMeditationTime) * 100} 
                 className="w-full"
               />
-              
-              <div className="flex items-center justify-center space-x-4">
-                <Button variant="ghost" size="sm" onClick={handleSkipBack}>
-                  <SkipBack className="h-4 w-4" />
-                </Button>
-                <Button 
-                  onClick={handlePlayPause}
-                  size="lg"
-                  className="rounded-full w-16 h-16"
-                >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6" />
-                  ) : (
-                    <Play className="h-6 w-6" />
-                  )}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleSkipForward}>
-                  <SkipForward className="h-4 w-4" />
-                </Button>
-              </div>
               
               <div className="flex justify-center space-x-2">
                 <Button variant="outline" size="sm" onClick={handleReset}>
@@ -164,7 +144,7 @@ const Mindfulness = () => {
                   ? "Meditação concluída! 🧘‍♀️" 
                   : isPlaying 
                     ? "Meditação em andamento..." 
-                    : "Clique no cronômetro ou pressione play para iniciar"
+                    : "Clique no cronômetro para iniciar"
                 }
               </p>
             </div>
