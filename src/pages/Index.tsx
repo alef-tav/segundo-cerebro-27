@@ -1,11 +1,10 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Bot, Search, Bell, User } from "lucide-react";
-import { AIChatbot } from "@/components/AIChatbot";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Search, Bell, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -33,16 +32,7 @@ const Index = () => {
           <Button variant="ghost" size="icon">
             <User className="h-5 w-5" />
           </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Bot className="h-5 w-5" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px] p-0">
-              <AIChatbot />
-            </PopoverContent>
-          </Popover>
+          <ThemeToggle />
         </div>
       </div>
 
