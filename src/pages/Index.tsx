@@ -5,9 +5,11 @@ import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Bot, Search, Bell
 import { AIChatbot } from "@/components/AIChatbot";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
+  const navigate = useNavigate();
   
   return (
     <div className="space-y-6 animate-in">
@@ -69,13 +71,25 @@ const Index = () => {
         <Card className="p-6 bg-secondary border-0">
           <h2 className="font-display text-xl font-semibold mb-4 text-primary">Ações Rápidas</h2>
           <div className="space-y-3">
-            <Button className="w-full justify-start" variant="outline">
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={() => navigate('/flow')}
+            >
               Iniciar Pomodoro
             </Button>
-            <Button className="w-full justify-start" variant="outline">
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={() => navigate('/habitos')}
+            >
               Adicionar Nova Tarefa
             </Button>
-            <Button className="w-full justify-start" variant="outline">
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={() => navigate('/anotacoes')}
+            >
               Criar Nota
             </Button>
           </div>
@@ -108,7 +122,13 @@ const Index = () => {
                 <Check className="h-5 w-5 text-primary" />
                 Não Esquecer
               </h2>
-              <Button variant="outline" size="sm">Novo</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/habitos')}
+              >
+                Novo
+              </Button>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 p-3 rounded-lg bg-accent/30 border border-accent/50">
@@ -135,7 +155,13 @@ const Index = () => {
                 <Clock className="h-5 w-5 text-primary" />
                 Rotina
               </h2>
-              <Button variant="outline" size="sm">Novo</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/habitos')}
+              >
+                Novo
+              </Button>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
@@ -162,7 +188,13 @@ const Index = () => {
                 <DollarSign className="h-5 w-5 text-primary" />
                 Financeiro (Hoje)
               </h2>
-              <Button variant="outline" size="sm">Ver seção</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/financeiro')}
+              >
+                Ver seção
+              </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
@@ -203,7 +235,13 @@ const Index = () => {
                 <Dumbbell className="h-5 w-5 text-primary" />
                 Treinos
               </h2>
-              <Button variant="outline" size="sm">Ver seção</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/treino')}
+              >
+                Ver seção
+              </Button>
             </div>
             <div className="grid grid-cols-1 gap-3">
               <div className="p-4 rounded-lg bg-accent/30 border border-accent/50">
@@ -228,7 +266,13 @@ const Index = () => {
                 <Coffee className="h-5 w-5 text-primary" />
                 Refeições
               </h2>
-              <Button variant="outline" size="sm">Ver seção</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/treino')}
+              >
+                Ver seção
+              </Button>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
@@ -255,7 +299,13 @@ const Index = () => {
                 <Calendar className="h-5 w-5 text-primary" />
                 Compromissos
               </h2>
-              <Button variant="outline" size="sm">Ver seção</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/compromissos')}
+              >
+                Ver seção
+              </Button>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
