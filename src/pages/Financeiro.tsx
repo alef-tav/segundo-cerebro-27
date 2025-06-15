@@ -4,9 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet, Building } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet, Building, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
 const Financeiro = () => {
@@ -14,8 +15,10 @@ const Financeiro = () => {
   const [activeTab, setActiveTab] = useState("pessoais");
   const [transactionType, setTransactionType] = useState("receita");
 
-  const receitas = [
+  // Estado para transações pessoais
+  const [receitasPessoais, setReceitasPessoais] = useState([
     { 
+      id: 1,
       data: "13/06/25", 
       categoria: "Salário", 
       descricao: "Salário", 
@@ -25,6 +28,7 @@ const Financeiro = () => {
       icon: Building
     },
     { 
+      id: 2,
       data: "13/06/25", 
       categoria: "Mentoria", 
       descricao: "Mentoria", 
@@ -33,10 +37,11 @@ const Financeiro = () => {
       responsavel: "Fernando",
       icon: Building
     },
-  ];
+  ]);
 
-  const despesas = [
+  const [despesasPessoais, setDespesasPessoais] = useState([
     { 
+      id: 3,
       data: "13/06/25", 
       categoria: "Mercadinha", 
       descricao: "Mercadinha", 
@@ -46,6 +51,7 @@ const Financeiro = () => {
       icon: Building
     },
     { 
+      id: 4,
       data: "13/06/25", 
       categoria: "Cartão de Crédito", 
       descricao: "Cartão de Crédito", 
@@ -54,7 +60,82 @@ const Financeiro = () => {
       responsavel: "Fernando",
       icon: Building
     },
-  ];
+  ]);
+
+  // Estado para transações empresariais
+  const [receitasEmpresariais, setReceitasEmpresariais] = useState([
+    { 
+      id: 5,
+      data: "13/06/25", 
+      categoria: "Vendas", 
+      descricao: "Venda de Produtos", 
+      valor: 25000.00, 
+      conta: "Conta Empresarial",
+      responsavel: "Empresa",
+      icon: Building
+    },
+    { 
+      id: 6,
+      data: "12/06/25", 
+      categoria: "Consultoria", 
+      descricao: "Serviços de Consultoria", 
+      valor: 15000.00, 
+      conta: "Conta Empresarial",
+      responsavel: "Empresa",
+      icon: Building
+    },
+  ]);
+
+  const [despesasEmpresariais, setDespesasEmpresariais] = useState([
+    { 
+      id: 7,
+      data: "13/06/25", 
+      categoria: "Fornecedores", 
+      descricao: "Compra de Materiais", 
+      valor: 8000.00, 
+      conta: "Conta Empresarial",
+      responsavel: "Empresa",
+      icon: Building
+    },
+    { 
+      id: 8,
+      data: "12/06/25", 
+      categoria: "Salários", 
+      descricao: "Folha de Pagamento", 
+      valor: 12000.00, 
+      conta: "Conta Empresarial",
+      responsavel: "Empresa",
+      icon: Building
+    },
+  ]);
+
+  // Funções para deletar transações
+  const deleteReceita = (id: number, tipo: 'pessoal' | 'empresarial') => {
+    if (tipo === 'pessoal') {
+      setReceitasPessoais(prev => prev.filter(item => item.id !== id));
+    } else {
+      setReceitasEmpresariais(prev => prev.filter(item => item.id !== id));
+    }
+  };
+
+  const deleteDespesa = (id: number, tipo: 'pessoal' | 'empresarial') => {
+    if (tipo === 'pessoal') {
+      setDespesasPessoais(prev => prev.filter(item => item.id !== id));
+    } else {
+      setDespesasEmpresariais(prev => prev.filter(item => item.id !== id));
+    }
+  };
+
+  // Cálculos dinâmicos para finanças pessoais
+  const totalReceitasPessoais = receitasPessoais.reduce((sum, receita) => sum + receita.valor, 0);
+  const totalDespesasPessoais = despesasPessoais.reduce((sum, despesa) => sum + despesa.valor, 0);
+  const saldoPessoal = totalReceitasPessoais - totalDespesasPessoais;
+  const totalTransacoesPessoais = receitasPessoais.length + despesasPessoais.length;
+
+  // Cálculos dinâmicos para finanças empresariais
+  const totalReceitasEmpresariais = receitasEmpresariais.reduce((sum, receita) => sum + receita.valor, 0);
+  const totalDespesasEmpresariais = despesasEmpresariais.reduce((sum, despesa) => sum + despesa.valor, 0);
+  const saldoEmpresarial = totalReceitasEmpresariais - totalDespesasEmpresariais;
 
   const handleSaveTransaction = () => {
     console.log("Salvando transação...");
@@ -258,7 +339,9 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Saldo Total</p>
-                    <p className="text-2xl font-bold text-green-500">$973.75</p>
+                    <p className={`text-2xl font-bold ${saldoPessoal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      R$ {saldoPessoal.toFixed(2)}
+                    </p>
                   </div>
                   <Wallet className="h-8 w-8 text-green-500" />
                 </div>
@@ -268,7 +351,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Receitas</p>
-                    <p className="text-2xl font-bold text-blue-500">$1500.00</p>
+                    <p className="text-2xl font-bold text-blue-500">R$ {totalReceitasPessoais.toFixed(2)}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-blue-500" />
                 </div>
@@ -278,7 +361,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Despesas</p>
-                    <p className="text-2xl font-bold text-red-500">$526.25</p>
+                    <p className="text-2xl font-bold text-red-500">R$ {totalDespesasPessoais.toFixed(2)}</p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-red-500" />
                 </div>
@@ -288,7 +371,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Transações</p>
-                    <p className="text-2xl font-bold">4</p>
+                    <p className="text-2xl font-bold">{totalTransacoesPessoais}</p>
                     <p className="text-xs text-muted-foreground">Todos os períodos</p>
                   </div>
                   <ArrowUp className="h-8 w-8 text-blue-500" />
@@ -372,8 +455,8 @@ const Financeiro = () => {
                   <h3 className="text-lg font-semibold text-green-500">Receitas</h3>
                 </div>
                 <div className="space-y-4">
-                  {receitas.map((receita, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                  {receitasPessoais.map((receita) => (
+                    <div key={receita.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-green-500/20 rounded-lg">
                           <receita.icon className="h-4 w-4 text-green-500" />
@@ -384,10 +467,36 @@ const Financeiro = () => {
                           <p className="text-xs text-muted-foreground">Conta: {receita.conta}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
-                        <p className="text-xs text-green-600">Income</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
+                          <p className="text-xs text-green-600">Income</p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir Receita</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteReceita(receita.id, 'pessoal')}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -401,8 +510,8 @@ const Financeiro = () => {
                   <h3 className="text-lg font-semibold text-red-500">Despesas</h3>
                 </div>
                 <div className="space-y-4">
-                  {despesas.map((despesa, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                  {despesasPessoais.map((despesa) => (
+                    <div key={despesa.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-red-500/20 rounded-lg">
                           <despesa.icon className="h-4 w-4 text-red-500" />
@@ -413,10 +522,36 @@ const Financeiro = () => {
                           <p className="text-xs text-muted-foreground">Conta: {despesa.conta}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
-                        <p className="text-xs text-red-600">Expense</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
+                          <p className="text-xs text-red-600">Expense</p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir Despesa</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteDespesa(despesa.id, 'pessoal')}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -426,12 +561,25 @@ const Financeiro = () => {
           </TabsContent>
 
           <TabsContent value="empresariais" className="space-y-6">
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+            {/* Cards de Resumo Empresarial */}
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
+              <Card className="p-6 bg-secondary border-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Total</p>
+                    <p className={`text-2xl font-bold ${saldoEmpresarial >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      R$ {saldoEmpresarial.toFixed(2)}
+                    </p>
+                  </div>
+                  <Wallet className="h-8 w-8 text-green-500" />
+                </div>
+              </Card>
+
               <Card className="p-6 bg-secondary border-0">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Faturamento</p>
-                    <p className="text-2xl font-bold text-green-500">R$ 150.000,00</p>
+                    <p className="text-2xl font-bold text-green-500">R$ {totalReceitasEmpresariais.toFixed(2)}</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-500" />
                 </div>
@@ -441,29 +589,167 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Custos Operacionais</p>
-                    <p className="text-2xl font-bold text-orange-500">R$ 85.000,00</p>
+                    <p className="text-2xl font-bold text-red-500">R$ {totalDespesasEmpresariais.toFixed(2)}</p>
                   </div>
-                  <TrendingDown className="h-8 w-8 text-orange-500" />
+                  <TrendingDown className="h-8 w-8 text-red-500" />
                 </div>
               </Card>
 
               <Card className="p-6 bg-secondary border-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Lucro Líquido</p>
-                    <p className="text-2xl font-bold text-blue-500">R$ 65.000,00</p>
+                    <p className="text-sm text-muted-foreground">Transações</p>
+                    <p className="text-2xl font-bold">{receitasEmpresariais.length + despesasEmpresariais.length}</p>
+                    <p className="text-xs text-muted-foreground">Todos os períodos</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-blue-500" />
                 </div>
               </Card>
             </div>
 
-            <Card className="p-6 bg-secondary border-0">
-              <h3 className="text-xl font-semibold mb-4">Fluxo de Caixa Empresarial</h3>
-              <p className="text-muted-foreground">
-                Acompanhe o fluxo de caixa da sua empresa e projete cenários futuros.
-              </p>
-            </Card>
+            {/* Contas Empresariais */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">🏢 Contas Empresariais</h3>
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+                <Card className="p-6 bg-secondary border-0">
+                  <h4 className="font-semibold mb-2">Conta Empresarial Principal</h4>
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Balance</span>
+                      <span className="font-bold">R$ {saldoEmpresarial.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-green-500">↗ Income</span>
+                      <span className="text-green-500">R$ {totalReceitasEmpresariais.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-red-500">↘ Expenses</span>
+                      <span className="text-red-500">R$ {totalDespesasEmpresariais.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 bg-secondary border-0">
+                  <div className="flex items-center justify-center py-8 text-muted-foreground">
+                    <Plus className="h-6 w-6 mr-2" />
+                    <span>Adicionar Nova Conta</span>
+                  </div>
+                </Card>
+              </div>
+            </div>
+
+            {/* Transações Empresariais - Duas Colunas */}
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+              {/* Coluna de Receitas Empresariais */}
+              <Card className="p-6 bg-secondary border-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowUp className="h-5 w-5 text-green-500" />
+                  <h3 className="text-lg font-semibold text-green-500">Receitas</h3>
+                </div>
+                <div className="space-y-4">
+                  {receitasEmpresariais.map((receita) => (
+                    <div key={receita.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-500/20 rounded-lg">
+                          <receita.icon className="h-4 w-4 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{receita.categoria}</p>
+                          <p className="text-sm text-muted-foreground">{receita.data}</p>
+                          <p className="text-xs text-muted-foreground">Conta: {receita.conta}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
+                          <p className="text-xs text-green-600">Income</p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir Receita</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir esta receita empresarial? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteReceita(receita.id, 'empresarial')}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Coluna de Despesas Empresariais */}
+              <Card className="p-6 bg-secondary border-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowDown className="h-5 w-5 text-red-500" />
+                  <h3 className="text-lg font-semibold text-red-500">Despesas</h3>
+                </div>
+                <div className="space-y-4">
+                  {despesasEmpresariais.map((despesa) => (
+                    <div key={despesa.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-500/20 rounded-lg">
+                          <despesa.icon className="h-4 w-4 text-red-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{despesa.categoria}</p>
+                          <p className="text-sm text-muted-foreground">{despesa.data}</p>
+                          <p className="text-xs text-muted-foreground">Conta: {despesa.conta}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
+                          <p className="text-xs text-red-600">Expense</p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir Despesa</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir esta despesa empresarial? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteDespesa(despesa.id, 'empresarial')}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
