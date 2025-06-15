@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart3, TrendingUp, TrendingDown, PieChart, Download } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function Relatorios() {
   const { financialType } = useFinancialContext();
@@ -85,7 +86,7 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Receitas do Mês' : 'Faturamento do Mês'}</p>
-                <p className="text-2xl font-bold text-green-600">R$ {dados.receitas.toFixed(2).replace('.', ',')}</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(dados.receitas)}</p>
                 <p className="text-sm text-green-600 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +{dados.variacaoReceitas}% vs mês anterior
@@ -101,7 +102,7 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Despesas do Mês' : 'Custos do Mês'}</p>
-                <p className="text-2xl font-bold text-red-600">R$ {dados.despesas.toFixed(2).replace('.', ',')}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(dados.despesas)}</p>
                 <p className="text-sm text-red-600 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +{dados.variacaoDespesas}% vs mês anterior
@@ -117,7 +118,7 @@ export default function Relatorios() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{financialType === 'pessoal' ? 'Economia do Mês' : 'Lucro do Mês'}</p>
-                <p className="text-2xl font-bold text-blue-600">R$ {dados.economia.toFixed(2).replace('.', ',')}</p>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(dados.economia)}</p>
                 <p className="text-sm text-blue-600 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +{dados.variacaoEconomia}% vs mês anterior
@@ -165,7 +166,7 @@ export default function Relatorios() {
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-muted-foreground">{item.percentual}%</span>
-                  <span className="font-semibold">R$ {item.valor.toFixed(2).replace('.', ',')}</span>
+                  <span className="font-semibold">{formatCurrency(item.valor)}</span>
                 </div>
               </div>
             ))}
