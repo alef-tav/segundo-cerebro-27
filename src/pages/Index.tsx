@@ -71,7 +71,7 @@ const Index = () => {
             <Button 
               className="w-full justify-start" 
               variant="outline"
-              onClick={() => navigate('/habitos')}
+              onClick={() => navigate('/anotacoes')}
             >
               Adicionar Nova Tarefa
             </Button>
