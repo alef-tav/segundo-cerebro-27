@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
+import { FinancialProvider } from "./contexts/FinancialContext";
 import Index from "./pages/Index";
 import Resumo from "./pages/Resumo";
 import Flow from "./pages/Flow";
@@ -36,24 +37,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/resumo" element={<Resumo />} />
-            <Route path="/flow" element={<Flow />} />
-            <Route path="/meta" element={<Meta />} />
-            <Route path="/compromissos" element={<Compromissos />} />
-            <Route path="/habitos" element={<Habitos />} />
-            <Route path="/conhecimento" element={<Conhecimento />} />
-            <Route path="/mindfulness" element={<Mindfulness />} />
-            <Route path="/anotacoes" element={<Anotacoes />} />
-            <Route path="/financeiro" element={<Financeiro />} />
-            <Route path="/financeiro/contas" element={<Contas />} />
-            <Route path="/financeiro/relatorios" element={<Relatorios />} />
-            <Route path="/financeiro/calendario" element={<Calendario />} />
-            <Route path="/treino" element={<Treino />} />
-          </Routes>
-        </Layout>
+        <FinancialProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/resumo" element={<Resumo />} />
+              <Route path="/flow" element={<Flow />} />
+              <Route path="/meta" element={<Meta />} />
+              <Route path="/compromissos" element={<Compromissos />} />
+              <Route path="/habitos" element={<Habitos />} />
+              <Route path="/conhecimento" element={<Conhecimento />} />
+              <Route path="/mindfulness" element={<Mindfulness />} />
+              <Route path="/anotacoes" element={<Anotacoes />} />
+              <Route path="/financeiro" element={<Financeiro />} />
+              <Route path="/financeiro/contas" element={<Contas />} />
+              <Route path="/financeiro/relatorios" element={<Relatorios />} />
+              <Route path="/financeiro/calendario" element={<Calendario />} />
+              <Route path="/treino" element={<Treino />} />
+            </Routes>
+          </Layout>
+        </FinancialProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

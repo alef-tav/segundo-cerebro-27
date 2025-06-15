@@ -1,5 +1,6 @@
-
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
+import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
+import { useFinancialContext } from "@/contexts/FinancialContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +9,12 @@ import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet,
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Financeiro = () => {
+  const { financialType, setFinancialType } = useFinancialContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("pessoais");
+  const [activeTab, setActiveTab] = useState("pessoal");
   const [transactionType, setTransactionType] = useState("receita");
 
   // Estado para transações pessoais
@@ -137,6 +139,15 @@ const Financeiro = () => {
   const totalDespesasEmpresariais = despesasEmpresariais.reduce((sum, despesa) => sum + despesa.valor, 0);
   const saldoEmpresarial = totalReceitasEmpresariais - totalDespesasEmpresariais;
 
+  // Sincronizar as abas com o contexto
+  useEffect(() => {
+    setFinancialType(financialType);
+  }, []);
+
+  const handleTabChange = (value: string) => {
+    setFinancialType(value as 'pessoal' | 'empresarial');
+  };
+
   const handleSaveTransaction = () => {
     console.log("Salvando transação...");
     setIsModalOpen(false);
@@ -146,11 +157,14 @@ const Financeiro = () => {
     <FinancialLayout>
       <div className="space-y-8 animate-in">
         <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            <h1 className="font-display text-4xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Acompanhe suas receitas e despesas
-            </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h1 className="font-display text-4xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Acompanhe suas receitas e despesas
+              </p>
+            </div>
+            <FinancialTypeSelector />
           </div>
           
           <div className="flex items-center gap-4">
@@ -326,13 +340,13 @@ const Financeiro = () => {
           <span>Período selecionado: Todos os períodos</span>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={financialType} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="pessoais">Finanças Pessoais</TabsTrigger>
-            <TabsTrigger value="empresariais">Finanças Empresariais</TabsTrigger>
+            <TabsTrigger value="pessoal">Finanças Pessoais</TabsTrigger>
+            <TabsTrigger value="empresarial">Finanças Empresariais</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pessoais" className="space-y-6">
+          <TabsContent value="pessoal" className="space-y-6">
             {/* Cards de Resumo */}
             <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
               <Card className="p-6 bg-secondary border-0">
@@ -560,7 +574,7 @@ const Financeiro = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="empresariais" className="space-y-6">
+          <TabsContent value="empresarial" className="space-y-6">
             {/* Cards de Resumo Empresarial */}
             <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
               <Card className="p-6 bg-secondary border-0">

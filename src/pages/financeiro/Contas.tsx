@@ -1,11 +1,15 @@
 
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
+import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
+import { useFinancialContext } from "@/contexts/FinancialContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Wallet, CreditCard, Building } from "lucide-react";
 
 export default function Contas() {
-  const contas = [
+  const { financialType } = useFinancialContext();
+
+  const contasPessoais = [
     { 
       id: 1, 
       nome: "Banco PagSeguro", 
@@ -32,15 +36,56 @@ export default function Contas() {
     },
   ];
 
+  const contasEmpresariais = [
+    { 
+      id: 1, 
+      nome: "Conta Empresarial Principal", 
+      tipo: "Conta Corrente PJ", 
+      saldo: 85000.00, 
+      icon: Building,
+      cor: "bg-green-500" 
+    },
+    { 
+      id: 2, 
+      nome: "Conta de Investimentos", 
+      tipo: "Conta Investimento", 
+      saldo: 150000.00, 
+      icon: Wallet,
+      cor: "bg-blue-500" 
+    },
+    { 
+      id: 3, 
+      nome: "Cartão Empresarial", 
+      tipo: "Cartão Corporativo", 
+      saldo: -8500.00, 
+      icon: CreditCard,
+      cor: "bg-red-500" 
+    },
+  ];
+
+  const contas = financialType === 'pessoal' ? contasPessoais : contasEmpresariais;
+
+  const calcularTotais = () => {
+    const totalPositivo = contas.filter(c => c.saldo > 0).reduce((sum, c) => sum + c.saldo, 0);
+    const totalNegativo = contas.filter(c => c.saldo < 0).reduce((sum, c) => sum + Math.abs(c.saldo), 0);
+    const patrimonio = totalPositivo - totalNegativo;
+    return { totalPositivo, totalNegativo, patrimonio };
+  };
+
+  const { totalPositivo, totalNegativo, patrimonio } = calcularTotais();
+
   return (
     <FinancialLayout>
       <div className="space-y-8">
         <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Contas</h1>
-            <p className="text-muted-foreground">
-              Gerencie suas contas bancárias e cartões
-            </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold">Contas</h1>
+              <p className="text-muted-foreground">
+                Gerencie suas contas {financialType === 'pessoal' ? 'pessoais' : 'empresariais'}
+              </p>
+            </div>
+            <FinancialTypeSelector />
           </div>
           
           <Button className="bg-blue-600 hover:bg-blue-700">
@@ -85,19 +130,19 @@ export default function Contas() {
 
         {/* Resumo das contas */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Resumo Geral</h3>
+          <h3 className="text-lg font-semibold mb-4">Resumo Geral - {financialType === 'pessoal' ? 'Pessoal' : 'Empresarial'}</h3>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total em Contas</p>
-              <p className="text-2xl font-bold text-green-600">R$ 23.750,00</p>
+              <p className="text-2xl font-bold text-green-600">R$ {totalPositivo.toFixed(2).replace('.', ',')}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total em Dívidas</p>
-              <p className="text-2xl font-bold text-red-600">R$ 2.500,00</p>
+              <p className="text-2xl font-bold text-red-600">R$ {totalNegativo.toFixed(2).replace('.', ',')}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Patrimônio Líquido</p>
-              <p className="text-2xl font-bold text-blue-600">R$ 21.250,00</p>
+              <p className="text-2xl font-bold text-blue-600">R$ {patrimonio.toFixed(2).replace('.', ',')}</p>
             </div>
           </div>
         </Card>
