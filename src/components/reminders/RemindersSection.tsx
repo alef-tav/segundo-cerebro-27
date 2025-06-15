@@ -7,6 +7,7 @@ import { Check, Plus, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface Reminder {
   id: string;
@@ -23,6 +24,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   const [newReminder, setNewReminder] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Buscar lembretes do usuário
   const { data: reminders = [], isLoading } = useQuery({
@@ -71,6 +73,17 @@ export function RemindersSection({ className }: RemindersSectionProps) {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       setNewReminder("");
       setIsAdding(false);
+      toast({
+        title: "Lembrete adicionado",
+        description: "Seu lembrete foi salvo com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o lembrete. Tente novamente.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -101,6 +114,17 @@ export function RemindersSection({ className }: RemindersSectionProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
+      toast({
+        title: "Lembrete removido",
+        description: "Seu lembrete foi removido com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o lembrete. Tente novamente.",
+        variant: "destructive",
+      });
     }
   });
 
