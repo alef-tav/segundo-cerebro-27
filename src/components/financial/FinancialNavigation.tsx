@@ -14,6 +14,7 @@ const financialNavigation = [
   { name: "Contas", href: "/financeiro/contas", icon: Wallet },
   { name: "Relatórios", href: "/financeiro/relatorios", icon: BarChart3 },
   { name: "Calendário", href: "/financeiro/calendario", icon: Calendar },
+  { name: "Configurações", href: "/financeiro/configuracoes", icon: Settings },
 ];
 
 export function FinancialNavigation() {
@@ -56,14 +57,9 @@ export function FinancialNavigation() {
             })}
           </nav>
 
-          {/* Right side actions */}
+          {/* Right side actions - removido o link duplicado de configurações */}
           <div className="flex items-center space-x-2">
-            <Link
-              to="/financeiro/configuracoes"
-              className="flex items-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-            >
-              <Settings className="h-4 w-4" />
-            </Link>
+            {/* Espaço para futuras ações */}
           </div>
         </div>
       </div>
