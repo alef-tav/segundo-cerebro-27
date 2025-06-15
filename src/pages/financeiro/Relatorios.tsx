@@ -19,16 +19,25 @@ export default function Relatorios() {
 
   // Calcular totais reais
   const dadosReais = useMemo(() => {
-    const totalReceitas = receitas.reduce((total, receita) => total + receita.valor, 0);
-    const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
+    const totalReceitas = receitas.reduce((total, receita) => {
+      const valor = typeof receita.valor === 'number' ? receita.valor : Number(receita.valor) || 0;
+      return total + valor;
+    }, 0);
+    
+    const totalDespesas = despesas.reduce((total, despesa) => {
+      const valor = typeof despesa.valor === 'number' ? despesa.valor : Number(despesa.valor) || 0;
+      return total + valor;
+    }, 0);
+    
     const saldoTotal = totalReceitas - totalDespesas;
 
     // Calcular categorias de despesas
     const categoriasDespesas = despesas.reduce((acc, despesa) => {
+      const valor = typeof despesa.valor === 'number' ? despesa.valor : Number(despesa.valor) || 0;
       if (!acc[despesa.categoria]) {
         acc[despesa.categoria] = 0;
       }
-      acc[despesa.categoria] += despesa.valor;
+      acc[despesa.categoria] += valor;
       return acc;
     }, {} as Record<string, number>);
 
