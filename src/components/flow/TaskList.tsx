@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Task {
   id: string;
@@ -15,6 +16,7 @@ interface Task {
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState("");
+  const navigate = useNavigate();
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -50,6 +52,14 @@ export function TaskList() {
     <Card className="p-6 bg-secondary border-0">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-xl font-semibold">Lista de Tarefas</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate('/anotacoes')}
+          className="flex items-center gap-2"
+        >
+          Ver Mais <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="flex gap-2 mb-6">
@@ -71,7 +81,7 @@ export function TaskList() {
             Nenhuma tarefa adicionada ainda
           </p>
         ) : (
-          tasks.map((task) => (
+          tasks.slice(0, 5).map((task) => (
             <div 
               key={task.id} 
               className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
@@ -103,6 +113,11 @@ export function TaskList() {
               </Button>
             </div>
           ))
+        )}
+        {tasks.length > 5 && (
+          <p className="text-sm text-muted-foreground text-center">
+            E mais {tasks.length - 5} tarefas...
+          </p>
         )}
       </div>
     </Card>
