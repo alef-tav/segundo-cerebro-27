@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Wallet, CreditCard, Building, Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { formatCurrency } from "@/lib/currency";
 
 export default function Contas() {
   const { financialType } = useFinancialContext();
@@ -169,7 +170,7 @@ export default function Contas() {
                           contaAtual?.id === conta.id ? 'text-white' : 
                           conta.saldo >= 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          <span className="text-xs">R$</span> {Math.abs(conta.saldo).toFixed(2)}
+                          {formatCurrency(Math.abs(conta.saldo))}
                         </p>
                       </div>
                     </div>
@@ -233,7 +234,7 @@ export default function Contas() {
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground">Saldo Atual</p>
                       <p className={`text-2xl font-bold ${contaAtual.saldo >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                        <span className="text-lg">R$</span> {Math.abs(contaAtual.saldo).toFixed(2)}
+                        {formatCurrency(Math.abs(contaAtual.saldo))}
                       </p>
                     </div>
                     <div className="text-center">
@@ -242,7 +243,7 @@ export default function Contas() {
                         Total Receitas
                       </p>
                       <p className="text-2xl font-bold text-green-600">
-                        <span className="text-lg">R$</span> {contaAtual.receitas.toFixed(2)}
+                        {formatCurrency(contaAtual.receitas)}
                       </p>
                     </div>
                     <div className="text-center">
@@ -251,7 +252,7 @@ export default function Contas() {
                         Total Despesas
                       </p>
                       <p className="text-2xl font-bold text-red-600">
-                        <span className="text-lg">R$</span> {contaAtual.despesas.toFixed(2)}
+                        {formatCurrency(contaAtual.despesas)}
                       </p>
                     </div>
                   </div>
@@ -281,7 +282,7 @@ export default function Contas() {
                           <span className={`text-sm font-bold text-right ${
                             transacao.tipo === 'receita' ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {transacao.tipo === 'receita' ? '+' : '-'}R$ {Math.abs(transacao.valor).toFixed(2)}
+                            {transacao.tipo === 'receita' ? '+' : '-'}{formatCurrency(Math.abs(transacao.valor))}
                           </span>
                         </div>
                       ))}
@@ -305,15 +306,15 @@ export default function Contas() {
           <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total em Contas</p>
-              <p className="text-2xl font-bold text-green-600">R$ {totalPositivo.toFixed(2).replace('.', ',')}</p>
+              <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPositivo)}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total em Dívidas</p>
-              <p className="text-2xl font-bold text-red-600">R$ {totalNegativo.toFixed(2).replace('.', ',')}</p>
+              <p className="text-2xl font-bold text-red-600">{formatCurrency(totalNegativo)}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Patrimônio Líquido</p>
-              <p className="text-2xl font-bold text-blue-600">R$ {patrimonio.toFixed(2).replace('.', ',')}</p>
+              <p className="text-2xl font-bold text-blue-600">{formatCurrency(patrimonio)}</p>
             </div>
           </div>
         </Card>

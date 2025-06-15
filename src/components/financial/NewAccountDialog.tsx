@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useFinancialContext } from "@/contexts/FinancialContext";
+import { formatCurrency } from "@/lib/currency";
 
 interface NewAccountFormData {
   nome: string;
@@ -141,7 +142,7 @@ export function NewAccountDialog({ onAddAccount }: NewAccountDialogProps) {
                       <Input 
                         type="number"
                         step="0.01"
-                        placeholder="0"
+                        placeholder="0,00"
                         className="pl-8"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}

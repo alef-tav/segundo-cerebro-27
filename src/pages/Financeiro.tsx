@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/currency";
 
 const Financeiro = () => {
   const { financialType, setFinancialType } = useFinancialContext();
@@ -354,7 +355,7 @@ const Financeiro = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Saldo Total</p>
                     <p className={`text-2xl font-bold ${saldoPessoal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      R$ {saldoPessoal.toFixed(2)}
+                      {formatCurrency(saldoPessoal)}
                     </p>
                   </div>
                   <Wallet className="h-8 w-8 text-green-500" />
@@ -365,7 +366,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Receitas</p>
-                    <p className="text-2xl font-bold text-blue-500">R$ {totalReceitasPessoais.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-500">{formatCurrency(totalReceitasPessoais)}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-blue-500" />
                 </div>
@@ -375,7 +376,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Despesas</p>
-                    <p className="text-2xl font-bold text-red-500">R$ {totalDespesasPessoais.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-red-500">{formatCurrency(totalDespesasPessoais)}</p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-red-500" />
                 </div>
@@ -402,15 +403,15 @@ const Financeiro = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">$0.00</span>
+                      <span className="font-bold">{formatCurrency(0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">$1000.00</span>
+                      <span className="text-green-500">{formatCurrency(1000)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">$200.00</span>
+                      <span className="text-red-500">{formatCurrency(200)}</span>
                     </div>
                   </div>
                 </Card>
@@ -420,15 +421,15 @@ const Financeiro = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">$0.00</span>
+                      <span className="font-bold">{formatCurrency(0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">$0.00</span>
+                      <span className="text-green-500">{formatCurrency(0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">$326.25</span>
+                      <span className="text-red-500">{formatCurrency(326.25)}</span>
                     </div>
                   </div>
                 </Card>
@@ -438,15 +439,15 @@ const Financeiro = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">$0.00</span>
+                      <span className="font-bold">{formatCurrency(0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">$500.00</span>
+                      <span className="text-green-500">{formatCurrency(500)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">$0.00</span>
+                      <span className="text-red-500">{formatCurrency(0)}</span>
                     </div>
                   </div>
                 </Card>
@@ -483,7 +484,7 @@ const Financeiro = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
+                          <p className="font-bold text-green-500">+{formatCurrency(receita.valor)}</p>
                           <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
                           <p className="text-xs text-green-600">Income</p>
                         </div>
@@ -538,7 +539,7 @@ const Financeiro = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
+                          <p className="font-bold text-red-500">-{formatCurrency(despesa.valor)}</p>
                           <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
                           <p className="text-xs text-red-600">Expense</p>
                         </div>
@@ -582,7 +583,7 @@ const Financeiro = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Saldo Total</p>
                     <p className={`text-2xl font-bold ${saldoEmpresarial >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      R$ {saldoEmpresarial.toFixed(2)}
+                      {formatCurrency(saldoEmpresarial)}
                     </p>
                   </div>
                   <Wallet className="h-8 w-8 text-green-500" />
@@ -593,7 +594,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Faturamento</p>
-                    <p className="text-2xl font-bold text-green-500">R$ {totalReceitasEmpresariais.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-500">{formatCurrency(totalReceitasEmpresariais)}</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-500" />
                 </div>
@@ -603,7 +604,7 @@ const Financeiro = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Custos Operacionais</p>
-                    <p className="text-2xl font-bold text-red-500">R$ {totalDespesasEmpresariais.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-red-500">{formatCurrency(totalDespesasEmpresariais)}</p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-red-500" />
                 </div>
@@ -630,15 +631,15 @@ const Financeiro = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Balance</span>
-                      <span className="font-bold">R$ {saldoEmpresarial.toFixed(2)}</span>
+                      <span className="font-bold">{formatCurrency(saldoEmpresarial)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-green-500">↗ Income</span>
-                      <span className="text-green-500">R$ {totalReceitasEmpresariais.toFixed(2)}</span>
+                      <span className="text-green-500">{formatCurrency(totalReceitasEmpresariais)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-red-500">↘ Expenses</span>
-                      <span className="text-red-500">R$ {totalDespesasEmpresariais.toFixed(2)}</span>
+                      <span className="text-red-500">{formatCurrency(totalDespesasEmpresariais)}</span>
                     </div>
                   </div>
                 </Card>
@@ -675,7 +676,7 @@ const Financeiro = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
+                          <p className="font-bold text-green-500">+{formatCurrency(receita.valor)}</p>
                           <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
                           <p className="text-xs text-green-600">Income</p>
                         </div>
@@ -730,7 +731,7 @@ const Financeiro = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
+                          <p className="font-bold text-red-500">-{formatCurrency(despesa.valor)}</p>
                           <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
                           <p className="text-xs text-red-600">Expense</p>
                         </div>
