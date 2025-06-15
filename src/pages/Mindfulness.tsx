@@ -111,19 +111,9 @@ const Mindfulness = () => {
 
             <div className="text-center space-y-4">
               <div className="relative">
-                <div 
-                  onClick={handlePlayPause}
-                  className="text-6xl font-mono font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex flex-col items-center justify-center p-8 rounded-full bg-primary/10 hover:bg-primary/20 border-2 border-primary/20 hover:border-primary/40 relative"
-                >
+                <div className="text-6xl font-mono font-bold flex flex-col items-center justify-center p-8 rounded-full bg-primary/10 border-2 border-primary/20">
                   <Timer className="h-8 w-8 text-primary mb-2" />
                   {formatTime(meditationTime)}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isPlaying ? (
-                      <Pause className="h-12 w-12 text-primary opacity-80" />
-                    ) : (
-                      <Play className="h-12 w-12 text-primary opacity-80" />
-                    )}
-                  </div>
                 </div>
               </div>
               
@@ -139,7 +129,7 @@ const Mindfulness = () => {
                 <Button 
                   onClick={handlePlayPause}
                   size="lg"
-                  className="rounded-full w-16 h-16 flex items-center justify-center"
+                  className="rounded-full w-16 h-16 flex items-center justify-center relative"
                 >
                   {isPlaying ? (
                     <Pause className="h-6 w-6" />
