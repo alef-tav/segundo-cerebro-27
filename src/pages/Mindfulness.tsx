@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { Heart, Play, Pause, SkipBack, SkipForward, Wind } from "lucide-react";
+import { Heart, Play, Pause, SkipBack, SkipForward, Wind, Timer } from "lucide-react";
 
 const Mindfulness = () => {
   // Estados para meditação
@@ -111,8 +110,14 @@ const Mindfulness = () => {
             </div>
 
             <div className="text-center space-y-4">
-              <div className="text-6xl font-mono font-bold">
-                {formatTime(meditationTime)}
+              <div className="relative">
+                <div 
+                  onClick={handlePlayPause}
+                  className="text-6xl font-mono font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex flex-col items-center justify-center p-8 rounded-full bg-primary/10 hover:bg-primary/20 border-2 border-primary/20 hover:border-primary/40"
+                >
+                  <Timer className="h-8 w-8 text-primary mb-2" />
+                  {formatTime(meditationTime)}
+                </div>
               </div>
               
               <Progress 
@@ -151,7 +156,7 @@ const Mindfulness = () => {
                   ? "Meditação concluída! 🧘‍♀️" 
                   : isPlaying 
                     ? "Meditação em andamento..." 
-                    : "Pressione play para iniciar a meditação"
+                    : "Clique no cronômetro ou pressione play para iniciar"
                 }
               </p>
             </div>
