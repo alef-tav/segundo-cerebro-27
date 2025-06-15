@@ -131,11 +131,7 @@ const Mindfulness = () => {
                   size="lg"
                   className="rounded-full w-16 h-16 flex items-center justify-center"
                 >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6" />
-                  ) : (
-                    <Play className="h-6 w-6 ml-1" />
-                  )}
+                  {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={handleSkipForward}>
                   <SkipForward className="h-4 w-4" />
