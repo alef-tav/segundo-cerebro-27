@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -19,12 +20,12 @@ const navigation = [
   { name: "Resumo do Dia", href: "/resumo", icon: SunMedium },
   { name: "Flow Caverna", href: "/flow", icon: Timer },
   { name: "Meta", href: "/meta", icon: Target },
-  { name: "Compromissos", href: "/compromissos", icon: Calendar },
-  { name: "Hábitos", href: "/habitos", icon: Brain },
-  { name: "Conhecimento", href: "/conhecimento", icon: BookOpen },
-  { name: "Mindfulness", href: "/mindfulness", icon: Heart },
-  { name: "Anotações", href: "/anotacoes", icon: Pencil },
   { name: "Financeiro", href: "/financeiro", icon: DollarSign },
+  { name: "Anotações", href: "/anotacoes", icon: Pencil },
+  { name: "Compromissos", href: "/compromissos", icon: Calendar },
+  { name: "Conhecimento", href: "/conhecimento", icon: BookOpen },
+  { name: "Hábitos", href: "/habitos", icon: Brain },
+  { name: "Mindfulness", href: "/mindfulness", icon: Heart },
   { name: "Treino", href: "/treino", icon: Dumbbell },
 ];
 
