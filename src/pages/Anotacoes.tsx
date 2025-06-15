@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { FullTaskList } from "@/components/notes/FullTaskList";
 import { NotesBlock } from "@/components/notes/NotesBlock";
@@ -67,6 +66,26 @@ const Anotacoes = () => {
     );
   };
 
+  const handleUpdateTask = (taskId: string, newText: string) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === taskId 
+          ? { ...task, text: newText }
+          : task
+      )
+    );
+  };
+
+  const handleUpdateNote = (noteId: string, title: string, content: string, links: string[]) => {
+    setNotes(prevNotes => 
+      prevNotes.map(note => 
+        note.id === noteId 
+          ? { ...note, title, content, links, updatedAt: new Date() }
+          : note
+      )
+    );
+  };
+
   return (
     <div className="space-y-8 animate-in">
       <div className="space-y-2">
@@ -91,6 +110,8 @@ const Anotacoes = () => {
           notes={notes}
           onLinkTaskToNote={handleLinkTaskToNote}
           onUnlinkTaskFromNote={handleUnlinkTaskFromNote}
+          onUpdateTask={handleUpdateTask}
+          onUpdateNote={handleUpdateNote}
         />
       </div>
     </div>
