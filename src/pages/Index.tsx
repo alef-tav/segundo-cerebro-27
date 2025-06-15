@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Search, Bell, User } from "lucide-react";
+import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Search, Bell, User, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -43,17 +43,17 @@ const Index = () => {
         <Card className="p-6 bg-secondary border-0">
           <h2 className="font-display text-xl font-semibold mb-4 text-primary">Resumo Diário</h2>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-green-400">
+            <div className="flex items-center gap-3 text-muted-foreground">
               <Check className="h-4 w-4" />
-              <span className="text-sm">5 tarefas concluídas</span>
+              <span className="text-sm">0 tarefas concluídas</span>
             </div>
-            <div className="flex items-center gap-3 text-blue-400">
+            <div className="flex items-center gap-3 text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span className="text-sm">2 horas de trabalho focado</span>
+              <span className="text-sm">0 horas de trabalho focado</span>
             </div>
-            <div className="flex items-center gap-3 text-red-400">
+            <div className="flex items-center gap-3 text-muted-foreground">
               <DollarSign className="h-4 w-4" />
-              <span className="text-sm">1 marco de meta alcançado</span>
+              <span className="text-sm">0 marcos de meta alcançados</span>
             </div>
           </div>
         </Card>
@@ -67,6 +67,7 @@ const Index = () => {
               variant="outline"
               onClick={() => navigate('/flow')}
             >
+              <Plus className="h-4 w-4 mr-2" />
               Iniciar Pomodoro
             </Button>
             <Button 
@@ -74,6 +75,7 @@ const Index = () => {
               variant="outline"
               onClick={() => navigate('/anotacoes')}
             >
+              <Plus className="h-4 w-4 mr-2" />
               Adicionar Nova Tarefa
             </Button>
             <Button 
@@ -81,6 +83,7 @@ const Index = () => {
               variant="outline"
               onClick={() => navigate('/conhecimento')}
             >
+              <Plus className="h-4 w-4 mr-2" />
               Adicionar Conhecimento
             </Button>
           </div>
@@ -89,16 +92,17 @@ const Index = () => {
         {/* Próximos Eventos */}
         <Card className="p-6 bg-secondary border-0">
           <h2 className="font-display text-xl font-semibold mb-4 text-primary">Próximos Eventos</h2>
-          <div className="space-y-3">
-            <div className="text-sm">
-              <div className="font-medium">Reunião com a Equipe - 14:00</div>
-            </div>
-            <div className="text-sm">
-              <div className="font-medium">Sessão de Academia - 17:30</div>
-            </div>
-            <div className="text-sm">
-              <div className="font-medium">Ler 30 páginas - 20:00</div>
-            </div>
+          <div className="text-center py-4 text-muted-foreground">
+            <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Nenhum evento agendado</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+              onClick={() => navigate('/compromissos')}
+            >
+              Adicionar evento
+            </Button>
           </div>
         </Card>
       </div>
@@ -121,22 +125,14 @@ const Index = () => {
                 size="sm"
                 onClick={() => navigate('/habitos')}
               >
+                <Plus className="h-4 w-4 mr-2" />
                 Novo
               </Button>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
-                <span className="text-sm font-medium">06:00 às 07:00</span>
-                <span className="text-sm">Ritual matinal</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">07:00 às 08:00</span>
-                <span className="text-sm">Café da manhã</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">09:00 às 11:58</span>
-                <span className="text-sm">Escritório</span>
-              </div>
+            <div className="text-center py-4 text-muted-foreground">
+              <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhuma rotina configurada</p>
+              <p className="text-xs">Comece criando seus hábitos diários</p>
             </div>
           </div>
         </Card>
@@ -147,43 +143,20 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-primary" />
-                Financeiro (Hoje)
+                Financeiro
               </h2>
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => navigate('/financeiro')}
               >
-                Ver seção
+                Configurar
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-green-400">A receber</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Freela</span>
-                    <span className="font-medium">R$ 750,00</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Saque Corretora</span>
-                    <span className="font-medium">R$ 963,61</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-red-400">A pagar</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Conta de Luz</span>
-                    <span className="font-medium">R$ 328,46</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Internet</span>
-                    <span className="font-medium">R$ 87,90</span>
-                  </div>
-                </div>
-              </div>
+            <div className="text-center py-4 text-muted-foreground">
+              <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Configure suas contas</p>
+              <p className="text-xs">Comece adicionando suas primeiras contas financeiras</p>
             </div>
           </div>
         </Card>
@@ -201,20 +174,14 @@ const Index = () => {
                 size="sm"
                 onClick={() => navigate('/treino')}
               >
-                Ver seção
+                <Plus className="h-4 w-4 mr-2" />
+                Novo
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-3">
-              <div className="p-4 rounded-lg bg-accent/30 border border-accent/50">
-                <h3 className="font-semibold mb-1">Treino 1</h3>
-                <p className="text-xs text-muted-foreground mb-1">06:00 às 07:00</p>
-                <p className="text-sm">Bike</p>
-              </div>
-              <div className="p-4 rounded-lg bg-accent/30 border border-accent/50">
-                <h3 className="font-semibold mb-1">Treino 2</h3>
-                <p className="text-xs text-muted-foreground mb-1">20:00 às 21:00</p>
-                <p className="text-sm">Musculação</p>
-              </div>
+            <div className="text-center py-4 text-muted-foreground">
+              <Dumbbell className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhum treino planejado</p>
+              <p className="text-xs">Configure seus treinos e atividades</p>
             </div>
           </div>
         </Card>
@@ -232,22 +199,14 @@ const Index = () => {
                 size="sm"
                 onClick={() => navigate('/treino')}
               >
-                Ver seção
+                <Plus className="h-4 w-4 mr-2" />
+                Novo
               </Button>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
-                <span className="text-sm font-medium">07:00</span>
-                <span className="text-sm">Café da manhã</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">10:00</span>
-                <span className="text-sm">Lanche das 10</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">12:00</span>
-                <span className="text-sm">Almoço</span>
-              </div>
+            <div className="text-center py-4 text-muted-foreground">
+              <Coffee className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhuma refeição planejada</p>
+              <p className="text-xs">Configure seu plano alimentar</p>
             </div>
           </div>
         </Card>
@@ -265,22 +224,14 @@ const Index = () => {
                 size="sm"
                 onClick={() => navigate('/compromissos')}
               >
-                Ver seção
+                <Plus className="h-4 w-4 mr-2" />
+                Novo
               </Button>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between p-3 rounded-lg bg-accent/30 border border-accent/50">
-                <span className="text-sm font-medium">09:00 às 09:30</span>
-                <span className="text-sm">Alinhamento com o time</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">10:00 às 10:30</span>
-                <span className="text-sm">Call com alunos</span>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium">11:00 às 11:30</span>
-                <span className="text-sm">Treinar novos colaboradores</span>
-              </div>
+            <div className="text-center py-4 text-muted-foreground">
+              <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhum compromisso agendado</p>
+              <p className="text-xs">Organize sua agenda</p>
             </div>
           </div>
         </Card>

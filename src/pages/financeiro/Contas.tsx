@@ -5,7 +5,7 @@ import { NewAccountDialog } from "@/components/financial/NewAccountDialog";
 import { useFinancialContext } from "@/contexts/FinancialContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, CreditCard, Building, Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, CreditCard, Building, Edit, Trash2, TrendingUp, TrendingDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { formatCurrency } from "@/lib/currency";
@@ -14,90 +14,9 @@ export default function Contas() {
   const { financialType } = useFinancialContext();
   const [contasSelecionada, setContaSelecionada] = useState<number | null>(null);
 
-  const [contasPessoais, setContasPessoais] = useState([
-    { 
-      id: 1, 
-      nome: "Banco PagSeguro", 
-      tipo: "Conta Corrente", 
-      saldo: 15000.00, 
-      icon: Building,
-      cor: "bg-blue-500",
-      receitas: 1000.00,
-      despesas: 200.00,
-      transacoes: [
-        { id: 1, data: "13/06/2025", categoria: "Salário", descricao: "Salário", valor: 500.00, tipo: "receita" },
-        { id: 2, data: "12/06/2025", categoria: "Mentoria", descricao: "Mentoria", valor: 500.00, tipo: "receita" },
-        { id: 3, data: "11/06/2025", categoria: "Mercado", descricao: "Compras do mês", valor: -200.00, tipo: "despesa" }
-      ]
-    },
-    { 
-      id: 2, 
-      nome: "Cartão de Crédito", 
-      tipo: "Cartão", 
-      saldo: -2500.00, 
-      icon: CreditCard,
-      cor: "bg-purple-500",
-      receitas: 0.00,
-      despesas: 326.25,
-      transacoes: [
-        { id: 4, data: "13/06/2025", categoria: "Cartão de Crédito", descricao: "Fatura do cartão", valor: -326.25, tipo: "despesa" }
-      ]
-    },
-    { 
-      id: 3, 
-      nome: "Banco Inter", 
-      tipo: "Conta Corrente", 
-      saldo: 8750.00, 
-      icon: Building,
-      cor: "bg-orange-500",
-      receitas: 500.00,
-      despesas: 0.00,
-      transacoes: [
-        { id: 5, data: "13/06/2025", categoria: "Salário", descricao: "Salário", valor: 500.00, tipo: "receita" }
-      ]
-    },
-  ]);
-
-  const [contasEmpresariais, setContasEmpresariais] = useState([
-    { 
-      id: 1, 
-      nome: "Conta Empresarial Principal", 
-      tipo: "Conta Corrente PJ", 
-      saldo: 85000.00, 
-      icon: Building,
-      cor: "bg-green-500",
-      receitas: 40000.00,
-      despesas: 20000.00,
-      transacoes: [
-        { id: 1, data: "13/06/2025", categoria: "Vendas", descricao: "Venda de Produtos", valor: 25000.00, tipo: "receita" },
-        { id: 2, data: "12/06/2025", categoria: "Consultoria", descricao: "Serviços de Consultoria", valor: 15000.00, tipo: "receita" },
-        { id: 3, data: "11/06/2025", categoria: "Fornecedores", descricao: "Compra de Materiais", valor: -8000.00, tipo: "despesa" },
-        { id: 4, data: "10/06/2025", categoria: "Salários", descricao: "Folha de Pagamento", valor: -12000.00, tipo: "despesa" }
-      ]
-    },
-    { 
-      id: 2, 
-      nome: "Conta de Investimentos", 
-      tipo: "Conta Investimento", 
-      saldo: 150000.00, 
-      icon: Wallet,
-      cor: "bg-blue-500",
-      receitas: 0.00,
-      despesas: 0.00,
-      transacoes: []
-    },
-    { 
-      id: 3, 
-      nome: "Cartão Empresarial", 
-      tipo: "Cartão Corporativo", 
-      saldo: -8500.00, 
-      icon: CreditCard,
-      cor: "bg-red-500",
-      receitas: 0.00,
-      despesas: 8500.00,
-      transacoes: []
-    },
-  ]);
+  // Iniciando com arrays vazios para novos usuários
+  const [contasPessoais, setContasPessoais] = useState<any[]>([]);
+  const [contasEmpresariais, setContasEmpresariais] = useState<any[]>([]);
 
   const contas = financialType === 'pessoal' ? contasPessoais : contasEmpresariais;
   const setContas = financialType === 'pessoal' ? setContasPessoais : setContasEmpresariais;
@@ -105,7 +24,16 @@ export default function Contas() {
   const contaAtual = contasSelecionada ? contas.find(c => c.id === contasSelecionada) : contas[0];
 
   const handleAddAccount = (novaConta: any) => {
-    setContas(prev => [...prev, { ...novaConta, icon: Building, transacoes: [] }]);
+    const novaContaComId = {
+      ...novaConta,
+      id: Date.now(), // ID simples para exemplo
+      icon: Building,
+      cor: "bg-blue-500",
+      receitas: 0.00,
+      despesas: 0.00,
+      transacoes: []
+    };
+    setContas(prev => [...prev, novaContaComId]);
   };
 
   const handleDeleteAccount = (id: number) => {
@@ -123,6 +51,69 @@ export default function Contas() {
   };
 
   const { totalPositivo, totalNegativo, patrimonio } = calcularTotais();
+
+  // Estado vazio - quando não há contas cadastradas
+  if (contas.length === 0) {
+    return (
+      <FinancialLayout>
+        <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold">Contas</h1>
+                <p className="text-muted-foreground">
+                  Gerencie suas contas {financialType === 'pessoal' ? 'pessoais' : 'empresariais'}
+                </p>
+              </div>
+              <FinancialTypeSelector />
+            </div>
+            
+            <NewAccountDialog onAddAccount={handleAddAccount} />
+          </div>
+
+          {/* Estado vazio */}
+          <Card className="p-12 text-center">
+            <div className="space-y-4">
+              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                <Wallet className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Nenhuma conta cadastrada</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Comece adicionando sua primeira conta {financialType === 'pessoal' ? 'pessoal' : 'empresarial'} para começar a gerenciar suas finanças.
+                </p>
+              </div>
+              <NewAccountDialog onAddAccount={handleAddAccount}>
+                <Button className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Primeira Conta
+                </Button>
+              </NewAccountDialog>
+            </div>
+          </Card>
+
+          {/* Resumo Geral - Vazio */}
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Resumo Geral - {financialType === 'pessoal' ? 'Pessoal' : 'Empresarial'}</h3>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Total em Contas</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(0)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Total em Dívidas</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(0)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Patrimônio Líquido</p>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(0)}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </FinancialLayout>
+    );
+  }
 
   return (
     <FinancialLayout>
@@ -262,7 +253,7 @@ export default function Contas() {
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold mb-4">Histórico de Transações</h3>
                   
-                  {contaAtual.transacoes.length > 0 ? (
+                  {contaAtual.transacoes && contaAtual.transacoes.length > 0 ? (
                     <div className="space-y-3">
                       <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground border-b pb-2">
                         <span>DATA</span>
@@ -271,7 +262,7 @@ export default function Contas() {
                         <span className="text-right">VALOR</span>
                       </div>
                       
-                      {contaAtual.transacoes.map((transacao) => (
+                      {contaAtual.transacoes.map((transacao: any) => (
                         <div key={transacao.id} className="grid grid-cols-4 gap-4 py-3 border-b border-border/50 hover:bg-secondary/50 rounded-lg px-2">
                           <span className="text-sm">{transacao.data}</span>
                           <span className="text-sm flex items-center gap-2">
