@@ -1,4 +1,3 @@
-
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
 import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
 import { NewAccountDialog } from "@/components/financial/NewAccountDialog";
@@ -17,6 +16,7 @@ const Financeiro = () => {
   const { financialType, setFinancialType } = useFinancialContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("receita");
+  const [selectedPeriod, setSelectedPeriod] = useState("todos-periodos");
 
   // Estado para contas pessoais
   const [contasPessoais, setContasPessoais] = useState([
@@ -224,6 +224,20 @@ const Financeiro = () => {
   const saldo = financialType === 'pessoal' ? saldoPessoal : saldoEmpresarial;
   const totalTransacoes = receitas.length + despesas.length;
 
+  // Função para obter o texto do período selecionado
+  const getPeriodText = (period: string) => {
+    switch (period) {
+      case "todos-periodos":
+        return "Todos os períodos";
+      case "mes-atual":
+        return "Mês atual";
+      case "ultimos-30":
+        return "Últimos 30 dias";
+      default:
+        return "Todos os períodos";
+    }
+  };
+
   const handleSaveTransaction = () => {
     console.log("Salvando transação...");
     setIsModalOpen(false);
@@ -255,7 +269,7 @@ const Financeiro = () => {
               </SelectContent>
             </Select>
             
-            <Select defaultValue="todos-periodos">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Todos os períodos" />
               </SelectTrigger>
@@ -414,7 +428,7 @@ const Financeiro = () => {
         {/* Período selecionado */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>📅</span>
-          <span>Período selecionado: Todos os períodos</span>
+          <span>Período selecionado: {getPeriodText(selectedPeriod)}</span>
         </div>
 
         {/* Cards de Resumo */}
