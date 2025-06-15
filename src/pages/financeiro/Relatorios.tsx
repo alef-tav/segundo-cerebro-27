@@ -20,12 +20,12 @@ export default function Relatorios() {
   // Calcular totais reais
   const dadosReais = useMemo(() => {
     const totalReceitas = receitas.reduce((total, receita) => {
-      const valor = typeof receita.valor === 'number' ? receita.valor : Number(receita.valor) || 0;
+      const valor = Number(receita.valor) || 0;
       return total + valor;
     }, 0);
     
     const totalDespesas = despesas.reduce((total, despesa) => {
-      const valor = typeof despesa.valor === 'number' ? despesa.valor : Number(despesa.valor) || 0;
+      const valor = Number(despesa.valor) || 0;
       return total + valor;
     }, 0);
     
@@ -33,21 +33,23 @@ export default function Relatorios() {
 
     // Calcular categorias de despesas
     const categoriasDespesas = despesas.reduce((acc, despesa) => {
-      const valor = typeof despesa.valor === 'number' ? despesa.valor : Number(despesa.valor) || 0;
+      const valor = Number(despesa.valor) || 0;
       if (!acc[despesa.categoria]) {
         acc[despesa.categoria] = 0;
       }
-      acc[despesa.categoria] += valor;
+      acc[despesa.categoria] = (acc[despesa.categoria] || 0) + valor;
       return acc;
     }, {} as Record<string, number>);
 
     const categoriasFormatadas = Object.entries(categoriasDespesas).map(([categoria, valor], index) => {
       const cores = ["bg-red-500", "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-yellow-500"];
-      const percentual = totalDespesas > 0 ? Math.round((valor / totalDespesas) * 100) : 0;
+      const valorNumerico = Number(valor) || 0;
+      const totalDespesasNumerico = Number(totalDespesas) || 0;
+      const percentual = totalDespesasNumerico > 0 ? Math.round((valorNumerico / totalDespesasNumerico) * 100) : 0;
       
       return {
         categoria,
-        valor,
+        valor: valorNumerico,
         percentual,
         cor: cores[index % cores.length]
       };
