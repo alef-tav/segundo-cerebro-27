@@ -16,8 +16,15 @@ interface EventsListProps {
 }
 
 export const EventsList = ({ events }: EventsListProps) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day for proper comparison
+  
   const upcomingEvents = events
-    .filter(event => event.date >= new Date())
+    .filter(event => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0); // Reset to start of day for proper comparison
+      return eventDate >= today;
+    })
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 5);
 
