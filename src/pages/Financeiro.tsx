@@ -1,3 +1,4 @@
+
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
 import { FinancialTypeSelector } from "@/components/financial/FinancialTypeSelector";
 import { NewAccountDialog } from "@/components/financial/NewAccountDialog";
@@ -9,11 +10,11 @@ import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet,
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/currency";
 
 const Financeiro = () => {
-  const { financialType } = useFinancialContext();
+  const { financialType, setFinancialType } = useFinancialContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("receita");
 
@@ -179,6 +180,15 @@ const Financeiro = () => {
     },
   ]);
 
+  // Calcular totais
+  const totalReceitasPessoais = receitasPessoais.reduce((total, receita) => total + receita.valor, 0);
+  const totalDespesasPessoais = despesasPessoais.reduce((total, despesa) => total + despesa.valor, 0);
+  const totalReceitasEmpresariais = receitasEmpresariais.reduce((total, receita) => total + receita.valor, 0);
+  const totalDespesasEmpresariais = despesasEmpresariais.reduce((total, despesa) => total + despesa.valor, 0);
+  
+  const saldoPessoal = contasPessoais.reduce((total, conta) => total + conta.saldo, 0);
+  const saldoEmpresarial = contasEmpresariais.reduce((total, conta) => total + conta.saldo, 0);
+
   // Função para adicionar nova conta
   const handleAddAccount = (novaConta: any) => {
     if (financialType === 'pessoal') {
@@ -213,15 +223,6 @@ const Financeiro = () => {
   const totalDespesas = financialType === 'pessoal' ? totalDespesasPessoais : totalDespesasEmpresariais;
   const saldo = financialType === 'pessoal' ? saldoPessoal : saldoEmpresarial;
   const totalTransacoes = receitas.length + despesas.length;
-
-  // Sincronizar as abas com o contexto
-  useEffect(() => {
-    setFinancialType(financialType);
-  }, []);
-
-  const handleTabChange = (value: string) => {
-    setFinancialType(value as 'pessoal' | 'empresarial');
-  };
 
   const handleSaveTransaction = () => {
     console.log("Salvando transação...");
