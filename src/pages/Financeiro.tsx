@@ -1,10 +1,10 @@
+
 import { FinancialLayout } from "@/components/financial/FinancialLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet, X } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Plus, ArrowUp, ArrowDown, Wallet, Building } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -14,12 +14,46 @@ const Financeiro = () => {
   const [activeTab, setActiveTab] = useState("pessoais");
   const [transactionType, setTransactionType] = useState("receita");
 
-  const transacoes = [
-    { data: "2023-06-01", categoria: "Salário", descricao: "Salário mensal", tipo: "Receita", valor: 15000.00 },
-    { data: "2023-06-01", categoria: "Freelance", descricao: "Projeto freelance", tipo: "Receita", valor: 10000.00 },
-    { data: "2023-06-02", categoria: "Aluguel", descricao: "Aluguel do apartamento", tipo: "Despesa", valor: 2500.00 },
-    { data: "2023-06-03", categoria: "Alimentação", descricao: "Compras do mês", tipo: "Despesa", valor: 1500.00 },
-    { data: "2023-06-03", categoria: "Transporte", descricao: "Combustível e transporte", tipo: "Despesa", valor: 1000.00 },
+  const receitas = [
+    { 
+      data: "13/06/25", 
+      categoria: "Salário", 
+      descricao: "Salário", 
+      valor: 500.00, 
+      conta: "Banco Inter",
+      responsavel: "Fernando",
+      icon: Building
+    },
+    { 
+      data: "13/06/25", 
+      categoria: "Mentoria", 
+      descricao: "Mentoria", 
+      valor: 1000.00, 
+      conta: "Banco PagSeguro",
+      responsavel: "Fernando",
+      icon: Building
+    },
+  ];
+
+  const despesas = [
+    { 
+      data: "13/06/25", 
+      categoria: "Mercadinha", 
+      descricao: "Mercadinha", 
+      valor: 200.00, 
+      conta: "Banco PagSeguro",
+      responsavel: "Fernando",
+      icon: Building
+    },
+    { 
+      data: "13/06/25", 
+      categoria: "Cartão de Crédito", 
+      descricao: "Cartão de Crédito", 
+      valor: 326.25, 
+      conta: "Cartão de Crédito",
+      responsavel: "Fernando",
+      icon: Building
+    },
   ];
 
   const handleSaveTransaction = () => {
@@ -329,46 +363,66 @@ const Financeiro = () => {
               </Card>
             </div>
 
-            {/* Transações Recentes */}
-            <Card className="p-6 bg-secondary border-0">
-              <h3 className="text-xl font-semibold mb-4">Transações Recentes</h3>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transacoes.map((transacao, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{transacao.data}</TableCell>
-                        <TableCell>{transacao.categoria}</TableCell>
-                        <TableCell>{transacao.descricao}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            transacao.tipo === 'Receita' 
-                              ? 'bg-green-500/20 text-green-500' 
-                              : 'bg-red-500/20 text-red-500'
-                          }`}>
-                            {transacao.tipo}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className={transacao.tipo === 'Receita' ? 'text-green-500' : 'text-red-500'}>
-                            R$ {transacao.valor.toFixed(2).replace('.', ',')}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
+            {/* Transações Recentes - Duas Colunas */}
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+              {/* Coluna de Receitas */}
+              <Card className="p-6 bg-secondary border-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowUp className="h-5 w-5 text-green-500" />
+                  <h3 className="text-lg font-semibold text-green-500">Receitas</h3>
+                </div>
+                <div className="space-y-4">
+                  {receitas.map((receita, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-500/20 rounded-lg">
+                          <receita.icon className="h-4 w-4 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{receita.categoria}</p>
+                          <p className="text-sm text-muted-foreground">{receita.data}</p>
+                          <p className="text-xs text-muted-foreground">Conta: {receita.conta}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-500">+R$ {receita.valor.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{receita.responsavel}</p>
+                        <p className="text-xs text-green-600">Income</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Coluna de Despesas */}
+              <Card className="p-6 bg-secondary border-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowDown className="h-5 w-5 text-red-500" />
+                  <h3 className="text-lg font-semibold text-red-500">Despesas</h3>
+                </div>
+                <div className="space-y-4">
+                  {despesas.map((despesa, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-500/20 rounded-lg">
+                          <despesa.icon className="h-4 w-4 text-red-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{despesa.categoria}</p>
+                          <p className="text-sm text-muted-foreground">{despesa.data}</p>
+                          <p className="text-xs text-muted-foreground">Conta: {despesa.conta}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-red-500">-R$ {despesa.valor.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{despesa.responsavel}</p>
+                        <p className="text-xs text-red-600">Expense</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="empresariais" className="space-y-6">
