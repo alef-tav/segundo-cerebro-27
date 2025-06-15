@@ -27,6 +27,10 @@ const Compromissos = () => {
     setEvents(prev => [...prev, newEvent]);
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    setEvents(prev => prev.filter(event => event.id !== eventId));
+  };
+
   const handleNewEventClick = () => {
     if (!selectedDate) {
       // If no date is selected, select today
@@ -51,7 +55,10 @@ const Compromissos = () => {
           onDateSelect={setSelectedDate}
         />
         
-        <EventsList events={events} />
+        <EventsList 
+          events={events} 
+          onDeleteEvent={handleDeleteEvent}
+        />
       </div>
 
       <div className="flex justify-start">

@@ -1,7 +1,8 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock, X } from "lucide-react";
 
 interface Event {
   id: string;
@@ -13,9 +14,10 @@ interface Event {
 
 interface EventsListProps {
   events: Event[];
+  onDeleteEvent: (eventId: string) => void;
 }
 
-export const EventsList = ({ events }: EventsListProps) => {
+export const EventsList = ({ events, onDeleteEvent }: EventsListProps) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset to start of day for proper comparison
   
@@ -70,6 +72,14 @@ export const EventsList = ({ events }: EventsListProps) => {
                     </div>
                   </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                  onClick={() => onDeleteEvent(event.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
             ))}
           </div>
