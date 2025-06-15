@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +17,15 @@ import Anotacoes from "./pages/Anotacoes";
 import Financeiro from "./pages/Financeiro";
 import Treino from "./pages/Treino";
 
-const queryClient = new QueryClient();
+// Criar o queryClient fora do componente para evitar recriação
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutos
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
