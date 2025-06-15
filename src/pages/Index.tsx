@@ -5,6 +5,7 @@ import { Check, Clock, Calendar, DollarSign, Dumbbell, Coffee, Search, Bell, Use
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { RemindersSection } from "@/components/reminders/RemindersSection";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -104,38 +105,8 @@ const Index = () => {
 
       {/* Seções detalhadas */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-        {/* Não Esquecer */}
-        <Card className="p-6 bg-secondary border-0">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-                <Check className="h-5 w-5 text-primary" />
-                Não Esquecer
-              </h2>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/habitos')}
-              >
-                Novo
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-accent/30 border border-accent/50">
-                <input type="checkbox" className="rounded border-primary" />
-                <span className="text-sm">Baixar o app da Central Caverna</span>
-              </div>
-              <div className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <input type="checkbox" className="rounded border-primary" />
-                <span className="text-sm">Pagar Internet</span>
-              </div>
-              <div className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/20 transition-colors">
-                <input type="checkbox" className="rounded border-primary" />
-                <span className="text-sm">Responder Emails Pendentes</span>
-              </div>
-            </div>
-          </div>
-        </Card>
+        {/* Não Esquecer - Agora usando o componente específico */}
+        <RemindersSection />
 
         {/* Rotina */}
         <Card className="p-6 bg-secondary border-0">
