@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,47 +28,9 @@ interface VisionImage {
 }
 
 const Meta = () => {
-  const [metas, setMetas] = useState<Meta[]>([
-    {
-      id: "1",
-      titulo: "Correr uma maratona",
-      categoria: "Saúde",
-      descricao: "Completar minha primeira maratona de 42km",
-      progresso: 60,
-      prazo: "Dezembro 2024"
-    },
-    {
-      id: "2",
-      titulo: "Economizar R$10.000",
-      categoria: "Finanças",
-      descricao: "Juntar dinheiro para reserva de emergência",
-      progresso: 45,
-      prazo: "Março 2025"
-    },
-    {
-      id: "3",
-      titulo: "Aprender um novo idioma",
-      categoria: "Pessoal",
-      descricao: "Ficar fluente em inglês",
-      progresso: 30,
-      prazo: "Junho 2025"
-    }
-  ]);
-
-  const [visionImages, setVisionImages] = useState<VisionImage[]>([
-    {
-      id: "1",
-      titulo: "Casa dos Sonhos",
-      imagem: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop",
-      descricao: "Minha futura casa própria"
-    },
-    {
-      id: "2",
-      titulo: "Carro dos Sonhos",
-      imagem: "https://images.unsplash.com/photo-1549924231-f129b911e442?w=400&h=300&fit=crop",
-      descricao: "Tesla Model S"
-    }
-  ]);
+  // Começar com arrays vazios em vez de dados fictícios
+  const [metas, setMetas] = useState<Meta[]>([]);
+  const [visionImages, setVisionImages] = useState<VisionImage[]>([]);
 
   const [novaMetaOpen, setNovaMetaOpen] = useState(false);
   const [novaImagemOpen, setNovaImagemOpen] = useState(false);
@@ -104,7 +67,7 @@ const Meta = () => {
         ...novaMeta,
         progresso: 0
       };
-      setMetas([...metas, meta]);
+      setMetas(prevMetas => [...prevMetas, meta]);
       setNovaMeta({ titulo: "", categoria: "", descricao: "", prazo: "" });
       setNovaMetaOpen(false);
     }
@@ -116,18 +79,18 @@ const Meta = () => {
         id: Date.now().toString(),
         ...novaImagem
       };
-      setVisionImages([...visionImages, imagem]);
+      setVisionImages(prevImages => [...prevImages, imagem]);
       setNovaImagem({ titulo: "", imagem: "", descricao: "" });
       setNovaImagemOpen(false);
     }
   };
 
   const removerImagem = (id: string) => {
-    setVisionImages(visionImages.filter(img => img.id !== id));
+    setVisionImages(prevImages => prevImages.filter(img => img.id !== id));
   };
 
   const removerMeta = (id: string) => {
-    setMetas(metas.filter(meta => meta.id !== id));
+    setMetas(prevMetas => prevMetas.filter(meta => meta.id !== id));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,10 +98,10 @@ const Meta = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setNovaImagem({
-          ...novaImagem,
+        setNovaImagem(prev => ({
+          ...prev,
           imagem: e.target?.result as string
-        });
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -177,7 +140,7 @@ const Meta = () => {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="categoria">Categoria</Label>
-                    <Select value={novaMeta.categoria} onValueChange={(value) => setNovaMeta({...novaMeta, categoria: value})}>
+                    <Select value={novaMeta.categoria} onValueChange={(value) => setNovaMeta(prev => ({...prev, categoria: value}))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
@@ -193,7 +156,7 @@ const Meta = () => {
                     <Input
                       id="titulo"
                       value={novaMeta.titulo}
-                      onChange={(e) => setNovaMeta({...novaMeta, titulo: e.target.value})}
+                      onChange={(e) => setNovaMeta(prev => ({...prev, titulo: e.target.value}))}
                       placeholder="Ex: Correr uma maratona"
                     />
                   </div>
@@ -202,7 +165,7 @@ const Meta = () => {
                     <Input
                       id="descricao"
                       value={novaMeta.descricao}
-                      onChange={(e) => setNovaMeta({...novaMeta, descricao: e.target.value})}
+                      onChange={(e) => setNovaMeta(prev => ({...prev, descricao: e.target.value}))}
                       placeholder="Descreva sua meta..."
                     />
                   </div>
@@ -211,7 +174,7 @@ const Meta = () => {
                     <Input
                       id="prazo"
                       value={novaMeta.prazo}
-                      onChange={(e) => setNovaMeta({...novaMeta, prazo: e.target.value})}
+                      onChange={(e) => setNovaMeta(prev => ({...prev, prazo: e.target.value}))}
                       placeholder="Ex: Dezembro 2024"
                     />
                   </div>
@@ -223,50 +186,63 @@ const Meta = () => {
             </Dialog>
           </CardHeader>
           <CardContent className="space-y-4">
-            {metas.map((meta) => (
-              <div key={meta.id} className="space-y-3 p-4 rounded-lg border bg-card">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{meta.titulo}</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm font-medium ${getCategoriaColor(meta.categoria)}`}>
-                      {meta.categoria}
-                    </span>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir Meta</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir a meta "{meta.titulo}"? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => removerMeta(meta.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{meta.descricao}</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progresso</span>
-                    <span className="font-medium">{meta.progresso}%</span>
-                  </div>
-                  <Progress value={meta.progresso} className="h-2" />
-                </div>
-                {meta.prazo && (
-                  <p className="text-xs text-muted-foreground">Prazo: {meta.prazo}</p>
-                )}
+            {metas.length === 0 ? (
+              <div className="text-center py-8">
+                <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Nenhuma meta definida ainda</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Clique em "Nova Meta" para começar
+                </p>
               </div>
-            ))}
+            ) : (
+              metas.map((meta) => (
+                <div key={meta.id} className="space-y-3 p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">{meta.titulo}</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-sm font-medium ${getCategoriaColor(meta.categoria)}`}>
+                        {meta.categoria}
+                      </span>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Meta</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir a meta "{meta.titulo}"? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => removerMeta(meta.id)} 
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{meta.descricao}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progresso</span>
+                      <span className="font-medium">{meta.progresso}%</span>
+                    </div>
+                    <Progress value={meta.progresso} className="h-2" />
+                  </div>
+                  {meta.prazo && (
+                    <p className="text-xs text-muted-foreground">Prazo: {meta.prazo}</p>
+                  )}
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -291,7 +267,7 @@ const Meta = () => {
                     <Input
                       id="titulo-imagem"
                       value={novaImagem.titulo}
-                      onChange={(e) => setNovaImagem({...novaImagem, titulo: e.target.value})}
+                      onChange={(e) => setNovaImagem(prev => ({...prev, titulo: e.target.value}))}
                       placeholder="Ex: Casa dos Sonhos"
                     />
                   </div>
@@ -310,7 +286,7 @@ const Meta = () => {
                     )}
                     <Input
                       value={novaImagem.imagem}
-                      onChange={(e) => setNovaImagem({...novaImagem, imagem: e.target.value})}
+                      onChange={(e) => setNovaImagem(prev => ({...prev, imagem: e.target.value}))}
                       placeholder="https://exemplo.com/imagem.jpg"
                       className="mt-2"
                     />
@@ -320,7 +296,7 @@ const Meta = () => {
                     <Input
                       id="descricao-imagem"
                       value={novaImagem.descricao}
-                      onChange={(e) => setNovaImagem({...novaImagem, descricao: e.target.value})}
+                      onChange={(e) => setNovaImagem(prev => ({...prev, descricao: e.target.value}))}
                       placeholder="Descreva seu sonho..."
                     />
                   </div>
@@ -345,34 +321,7 @@ const Meta = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {visionImages.map((img) => (
-                <div key={img.id} className="group relative">
-                  <AspectRatio ratio={4/3} className="bg-muted rounded-lg overflow-hidden">
-                    <img
-                      src={img.imagem}
-                      alt={img.titulo}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => removerImagem(img.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </AspectRatio>
-                  <div className="mt-2">
-                    <h4 className="font-medium text-sm">{img.titulo}</h4>
-                    {img.descricao && (
-                      <p className="text-xs text-muted-foreground">{img.descricao}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-              {visionImages.length === 0 && (
+              {visionImages.length === 0 ? (
                 <div className="col-span-full">
                   <AspectRatio ratio={16/9} className="bg-muted rounded-lg border-2 border-dashed border-border flex items-center justify-center">
                     <div className="text-center">
@@ -386,6 +335,33 @@ const Meta = () => {
                     </div>
                   </AspectRatio>
                 </div>
+              ) : (
+                visionImages.map((img) => (
+                  <div key={img.id} className="group relative">
+                    <AspectRatio ratio={4/3} className="bg-muted rounded-lg overflow-hidden">
+                      <img
+                        src={img.imagem}
+                        alt={img.titulo}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => removerImagem(img.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </AspectRatio>
+                    <div className="mt-2">
+                      <h4 className="font-medium text-sm">{img.titulo}</h4>
+                      {img.descricao && (
+                        <p className="text-xs text-muted-foreground">{img.descricao}</p>
+                      )}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </CardContent>

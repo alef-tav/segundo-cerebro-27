@@ -54,6 +54,23 @@ const Resumo = () => {
     }
   });
 
+  // Buscar hábitos do usuário
+  const { data: habits = [] } = useQuery({
+    queryKey: ['habits'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('habits')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   // Calcular dados financeiros reais
   const totalReceitas = receitas.reduce((total, receita) => total + receita.valor, 0);
   const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
@@ -65,7 +82,11 @@ const Resumo = () => {
   const completedReminders = reminders.filter(r => r.completed).length;
   const reminderCompletionRate = totalReminders > 0 ? Math.round((completedReminders / totalReminders) * 100) : 0;
 
-  // Dados fictícios que serão substituídos por dados reais quando outras funcionalidades forem implementadas
+  const totalHabits = habits.length;
+  const completedHabits = habits.filter(h => h.completed).length;
+  const habitCompletionRate = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
+
+  // Dados de produtividade baseados apenas em dados reais
   const dailyStats = {
     tasks: {
       completed: completedReminders,
@@ -78,9 +99,9 @@ const Resumo = () => {
       goal: 240
     },
     habits: {
-      completed: 0, // Será conectado quando Hábitos for implementado
-      total: 0,
-      streak: 0
+      completed: completedHabits,
+      total: totalHabits,
+      streak: habits.reduce((maxStreak, habit) => Math.max(maxStreak, habit.streak || 0), 0)
     },
     appointments: {
       attended: 0, // Será conectado quando Compromissos for implementado
@@ -95,10 +116,38 @@ const Resumo = () => {
   };
 
   const getProductivityScore = () => {
-    const taskScore = totalReminders > 0 ? (completedReminders / totalReminders) * 40 : 20;
-    const focusScore = (dailyStats.focus.totalFocusTime / dailyStats.focus.goal) * 30;
-    const habitScore = dailyStats.habits.total > 0 ? (dailyStats.habits.completed / dailyStats.habits.total) * 30 : 15;
-    return Math.round(taskScore + focusScore + habitScore);
+    // Se não há dados, score é 0
+    if (totalReminders === 0 && totalHabits === 0 && dailyStats.focus.totalFocusTime === 0) {
+      return 0;
+    }
+
+    // Calcular score baseado apenas em dados existentes
+    let totalWeight = 0;
+    let score = 0;
+
+    // Score de tarefas (40% do total)
+    if (totalReminders > 0) {
+      score += (completedReminders / totalReminders) * 40;
+      totalWeight += 40;
+    }
+
+    // Score de hábitos (30% do total)
+    if (totalHabits > 0) {
+      score += (completedHabits / totalHabits) * 30;
+      totalWeight += 30;
+    }
+
+    // Score de foco (30% do total)
+    if (dailyStats.focus.goal > 0) {
+      score += (dailyStats.focus.totalFocusTime / dailyStats.focus.goal) * 30;
+      totalWeight += 30;
+    }
+
+    // Se não há peso total, retorna 0
+    if (totalWeight === 0) return 0;
+
+    // Normalizar o score baseado no peso disponível
+    return Math.round((score / totalWeight) * 100);
   };
 
   const productivityScore = getProductivityScore();
@@ -118,15 +167,15 @@ const Resumo = () => {
             <Award className="h-6 w-6 text-primary" />
             Score de Produtividade
           </h2>
-          <Badge variant={productivityScore >= 80 ? "default" : productivityScore >= 60 ? "secondary" : "destructive"} className="text-lg px-4 py-2">
+          <Badge variant={productivityScore >= 80 ? "default" : productivityScore >= 60 ? "secondary" : productivityScore > 0 ? "destructive" : "outline"} className="text-lg px-4 py-2">
             {productivityScore}/100
           </Badge>
         </div>
         <Progress value={productivityScore} className="h-3 mb-2" />
         <p className="text-sm text-muted-foreground">
-          {productivityScore >= 80 ? "Excelente produtividade hoje!" : 
+          {productivityScore === 0 ? "Adicione lembretes e hábitos para começar a acompanhar sua produtividade!" :
+           productivityScore >= 80 ? "Excelente produtividade hoje!" : 
            productivityScore >= 60 ? "Boa produtividade, continue assim!" : 
-           totalReminders === 0 ? "Adicione alguns lembretes para começar a acompanhar sua produtividade!" :
            "Há espaço para melhorar amanhã!"}
         </p>
       </Card>
@@ -165,14 +214,14 @@ const Resumo = () => {
         <Card className="p-4 bg-secondary border-0">
           <div className="flex items-center justify-between mb-3">
             <Target className="h-5 w-5 text-purple-500" />
-            <span className="text-2xl font-bold">{dailyStats.habits.completed}/{dailyStats.habits.total}</span>
+            <span className="text-2xl font-bold">{completedHabits}/{totalHabits}</span>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">Hábitos</p>
             <p className="text-xs text-muted-foreground">
               {dailyStats.habits.streak} dias de sequência
             </p>
-            <Progress value={dailyStats.habits.total > 0 ? (dailyStats.habits.completed / dailyStats.habits.total) * 100 : 0} className="h-2" />
+            <Progress value={habitCompletionRate} className="h-2" />
           </div>
         </Card>
 
@@ -205,6 +254,12 @@ const Resumo = () => {
                 <span className="text-sm text-card-foreground">{completedReminders} lembrete(s) concluído(s)</span>
               </div>
             )}
+            {completedHabits > 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
+                <Target className="h-4 w-4 text-purple-500" />
+                <span className="text-sm text-card-foreground">{completedHabits} hábito(s) completado(s)</span>
+              </div>
+            )}
             {totalReceitas > 0 && (
               <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
                 <DollarSign className="h-4 w-4 text-green-500" />
@@ -217,10 +272,10 @@ const Resumo = () => {
                 <span className="text-sm text-card-foreground">{accounts.length} conta(s) financeira(s) configurada(s)</span>
               </div>
             )}
-            {totalReminders === 0 && totalReceitas === 0 && accounts.length === 0 && (
+            {totalReminders === 0 && totalHabits === 0 && totalReceitas === 0 && accounts.length === 0 && (
               <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
                 <Brain className="h-4 w-4 text-orange-500" />
-                <span className="text-sm text-card-foreground">Comece adicionando lembretes e configurando suas finanças</span>
+                <span className="text-sm text-card-foreground">Comece adicionando lembretes, hábitos e configurando suas finanças</span>
               </div>
             )}
           </div>
@@ -259,6 +314,13 @@ const Resumo = () => {
                 {balanceDia >= 0 ? '+' : ''}{formatCurrency(balanceDia)}
               </p>
             </div>
+            {totalReceitas === 0 && totalDespesas === 0 && accounts.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">
+                  Configure suas finanças para ver o resumo aqui
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -275,6 +337,12 @@ const Resumo = () => {
                 <span className="text-sm">{totalReminders - completedReminders} lembrete(s) pendente(s)</span>
               </div>
             )}
+            {totalHabits - completedHabits > 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
+                <Target className="h-4 w-4 text-purple-500" />
+                <span className="text-sm">{totalHabits - completedHabits} hábito(s) pendente(s)</span>
+              </div>
+            )}
             {accounts.length === 0 && (
               <div className="flex items-center gap-3 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                 <DollarSign className="h-4 w-4 text-blue-500" />
@@ -282,9 +350,15 @@ const Resumo = () => {
               </div>
             )}
             {totalReminders === 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
-                <Target className="h-4 w-4 text-purple-500" />
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                <Check className="h-4 w-4 text-green-500" />
                 <span className="text-sm">Adicione seus primeiros lembretes</span>
+              </div>
+            )}
+            {totalHabits === 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                <Target className="h-4 w-4 text-orange-500" />
+                <span className="text-sm">Crie seus primeiros hábitos</span>
               </div>
             )}
           </div>
@@ -300,8 +374,8 @@ const Resumo = () => {
             <div className="space-y-2">
               <p className="text-sm font-medium text-green-500">✨ Pontos Fortes</p>
               <p className="text-xs text-muted-foreground">
-                {completedReminders > 0 ? 
-                  `Você completou ${completedReminders} lembrete(s) hoje!` :
+                {(completedReminders > 0 || completedHabits > 0) ? 
+                  `Você completou ${completedReminders} lembrete(s) e ${completedHabits} hábito(s) hoje!` :
                   "Configure seu dashboard para começar a acompanhar seu progresso."
                 }
               </p>
@@ -309,11 +383,11 @@ const Resumo = () => {
             <div className="space-y-2">
               <p className="text-sm font-medium text-blue-500">💡 Oportunidades</p>
               <p className="text-xs text-muted-foreground">
-                {totalReminders === 0 ? 
-                  "Comece adicionando alguns lembretes importantes." :
-                  totalReminders - completedReminders > 0 ?
-                  `Complete os ${totalReminders - completedReminders} lembrete(s) restante(s).` :
-                  "Todos os lembretes concluídos! Adicione novos desafios."
+                {totalReminders === 0 && totalHabits === 0 ? 
+                  "Comece adicionando alguns lembretes e hábitos importantes." :
+                  (totalReminders - completedReminders + totalHabits - completedHabits) > 0 ?
+                  `Complete os ${totalReminders - completedReminders + totalHabits - completedHabits} item(s) restante(s).` :
+                  "Todos os itens concluídos! Adicione novos desafios."
                 }
               </p>
             </div>
@@ -322,9 +396,9 @@ const Resumo = () => {
               <p className="text-xs text-muted-foreground">
                 {accounts.length === 0 ?
                   "Configure pelo menos uma conta financeira." :
-                  totalReminders === 0 ?
-                  "Adicione 3-5 lembretes importantes para organizar seu dia." :
-                  "Mantenha a consistência e complete todos os lembretes."
+                  totalReminders === 0 && totalHabits === 0 ?
+                  "Adicione 3-5 lembretes e hábitos para organizar seu dia." :
+                  "Mantenha a consistência e complete todos os itens."
                 }
               </p>
             </div>
