@@ -30,12 +30,12 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   const { data: reminders = [], isLoading } = useQuery({
     queryKey: ['reminders'],
     queryFn: async () => {
-      console.log('Fetching reminders...');
+      console.log('🔍 Fetching reminders...');
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('Current user:', user?.id);
+      console.log('👤 Current user:', user?.id);
       
       if (!user) {
-        console.log('No user authenticated, returning empty array');
+        console.log('❌ No user authenticated, returning empty array');
         return [];
       }
 
@@ -46,24 +46,26 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching reminders:', error);
+        console.error('💥 Error fetching reminders:', error);
         throw error;
       }
 
-      console.log('Fetched reminders:', data);
-      return data.map((reminder: any) => ({
+      console.log('✅ Fetched reminders from DB:', data);
+      const mappedReminders = data.map((reminder: any) => ({
         id: reminder.id,
         text: reminder.text,
         completed: reminder.completed,
         createdAt: new Date(reminder.created_at)
       }));
+      console.log('🔄 Mapped reminders:', mappedReminders);
+      return mappedReminders;
     }
   });
 
   // Adicionar lembrete
   const addReminderMutation = useMutation({
     mutationFn: async (text: string) => {
-      console.log('Adding reminder:', text);
+      console.log('➕ Adding reminder:', text);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
@@ -78,10 +80,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .single();
 
       if (error) {
-        console.error('Error adding reminder:', error);
+        console.error('💥 Error adding reminder:', error);
         throw error;
       }
-      console.log('Added reminder:', data);
+      console.log('✅ Added reminder:', data);
       return data;
     },
     onSuccess: () => {
@@ -94,7 +96,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
       });
     },
     onError: (error) => {
-      console.error('Error in addReminderMutation:', error);
+      console.error('💥 Error in addReminderMutation:', error);
       toast({
         title: "Erro",
         description: "Não foi possível adicionar o lembrete. Tente novamente.",
@@ -106,7 +108,7 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Marcar lembrete como concluído/não concluído
   const toggleReminderMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      console.log('Toggling reminder:', id, 'to completed:', completed);
+      console.log('🔄 Toggling reminder:', id, 'to completed:', completed);
       
       const { data, error } = await supabase
         .from('reminders')
@@ -115,18 +117,18 @@ export function RemindersSection({ className }: RemindersSectionProps) {
         .select();
 
       if (error) {
-        console.error('Error toggling reminder:', error);
+        console.error('💥 Error toggling reminder:', error);
         throw error;
       }
       
-      console.log('Toggle successful:', data);
+      console.log('✅ Toggle successful:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
     },
     onError: (error) => {
-      console.error('Error in toggleReminderMutation:', error);
+      console.error('💥 Error in toggleReminderMutation:', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o lembrete. Tente novamente.",
@@ -138,23 +140,48 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   // Remover lembrete
   const removeReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Removing reminder with ID:', id);
+      console.log('🗑️ ATTEMPTING TO REMOVE reminder with ID:', id);
+      console.log('🔍 Current user authentication check...');
+      
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('💥 Error getting user:', userError);
+        throw userError;
+      }
+      
+      if (!user) {
+        console.error('❌ No authenticated user found');
+        throw new Error('Usuário não autenticado');
+      }
+      
+      console.log('👤 Authenticated user ID:', user.id);
+      console.log('🎯 Attempting to delete reminder with ID:', id);
       
       const { data, error } = await supabase
         .from('reminders')
         .delete()
         .eq('id', id)
+        .eq('user_id', user.id) // Extra security check
         .select();
 
       if (error) {
-        console.error('Error removing reminder:', error);
+        console.error('💥 Error removing reminder:', error);
+        console.error('💥 Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
       
-      console.log('Remove successful:', data);
+      console.log('✅ Remove successful, deleted data:', data);
+      console.log('📊 Number of rows affected:', data?.length || 0);
+      
+      if (!data || data.length === 0) {
+        console.warn('⚠️ No rows were deleted - reminder may not exist or belong to another user');
+        throw new Error('Lembrete não encontrado ou não pertence ao usuário');
+      }
+      
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 Successfully removed reminder, invalidating queries...');
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       toast({
         title: "Lembrete removido",
@@ -162,10 +189,10 @@ export function RemindersSection({ className }: RemindersSectionProps) {
       });
     },
     onError: (error) => {
-      console.error('Error in removeReminderMutation:', error);
+      console.error('💥 Error in removeReminderMutation:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível remover o lembrete. Tente novamente.",
+        description: `Não foi possível remover o lembrete: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -178,12 +205,29 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   };
 
   const toggleReminder = (id: string, currentCompleted: boolean) => {
-    console.log('toggleReminder called for ID:', id, 'current:', currentCompleted);
+    console.log('🔄 toggleReminder called for ID:', id, 'current:', currentCompleted);
     toggleReminderMutation.mutate({ id, completed: !currentCompleted });
   };
 
   const removeReminder = (id: string) => {
-    console.log('removeReminder called for ID:', id);
+    console.log('🗑️ removeReminder button clicked for ID:', id);
+    console.log('📋 All current reminders:', reminders);
+    console.log('🔍 Looking for reminder with this ID in current list...');
+    
+    const reminderToDelete = reminders.find(r => r.id === id);
+    console.log('🎯 Found reminder to delete:', reminderToDelete);
+    
+    if (!reminderToDelete) {
+      console.error('❌ Reminder not found in current list!');
+      toast({
+        title: "Erro",
+        description: "Lembrete não encontrado na lista atual",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log('▶️ Calling removeReminderMutation.mutate with ID:', id);
     removeReminderMutation.mutate(id);
   };
 
@@ -206,10 +250,12 @@ export function RemindersSection({ className }: RemindersSectionProps) {
   const hasUserReminders = reminders.length > 0;
   const displayReminders = hasUserReminders ? reminders : defaultReminders;
 
-  console.log('Display state:', {
+  console.log('📊 Component render state:', {
     hasUserReminders,
     remindersCount: reminders.length,
-    displayRemindersCount: displayReminders.length
+    displayRemindersCount: displayReminders.length,
+    isLoading,
+    reminders: reminders.map(r => ({ id: r.id, text: r.text }))
   });
 
   return (
@@ -271,60 +317,79 @@ export function RemindersSection({ className }: RemindersSectionProps) {
               <p className="text-sm text-muted-foreground">Carregando lembretes...</p>
             </div>
           ) : (
-            displayReminders.map((reminder, index) => (
-              <div 
-                key={reminder.id} 
-                className={`flex items-center gap-2 p-3 rounded-lg transition-colors group ${
-                  index === 0 && !reminder.completed 
-                    ? 'bg-accent/30 border border-accent/50' 
-                    : 'hover:bg-accent/20'
-                } ${reminder.completed ? 'opacity-60' : ''}`}
-              >
-                <Checkbox
-                  checked={reminder.completed}
-                  onCheckedChange={(checked) => {
-                    console.log('Checkbox clicked:', {
-                      id: reminder.id,
-                      checked,
-                      hasUserReminders
-                    });
-                    
-                    // Só permite alteração se for lembrete do usuário
-                    if (hasUserReminders) {
-                      toggleReminder(reminder.id, reminder.completed);
-                    }
-                  }}
-                  className="rounded border-primary"
-                  disabled={toggleReminderMutation.isPending || !hasUserReminders}
-                />
-                <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
-                  {reminder.text}
-                </span>
-                {/* Botão de remover - só aparece para lembretes salvos do usuário */}
-                {hasUserReminders && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log('Remove button clicked for ID:', reminder.id);
-                      removeReminder(reminder.id);
+            displayReminders.map((reminder, index) => {
+              const isUserReminder = hasUserReminders;
+              const showDeleteButton = isUserReminder;
+              
+              console.log('🔍 Rendering reminder:', {
+                id: reminder.id,
+                text: reminder.text,
+                isUserReminder,
+                showDeleteButton,
+                hasUserReminders
+              });
+              
+              return (
+                <div 
+                  key={reminder.id} 
+                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors group ${
+                    index === 0 && !reminder.completed 
+                      ? 'bg-accent/30 border border-accent/50' 
+                      : 'hover:bg-accent/20'
+                  } ${reminder.completed ? 'opacity-60' : ''}`}
+                >
+                  <Checkbox
+                    checked={reminder.completed}
+                    onCheckedChange={(checked) => {
+                      console.log('☑️ Checkbox clicked:', {
+                        id: reminder.id,
+                        checked,
+                        isUserReminder
+                      });
+                      
+                      // Só permite alteração se for lembrete do usuário
+                      if (isUserReminder) {
+                        toggleReminder(reminder.id, reminder.completed);
+                      }
                     }}
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                    disabled={removeReminderMutation.isPending}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-            ))
+                    className="rounded border-primary"
+                    disabled={toggleReminderMutation.isPending || !isUserReminder}
+                  />
+                  <span className={`text-sm flex-1 ${reminder.completed ? 'line-through text-muted-foreground' : ''}`}>
+                    {reminder.text}
+                  </span>
+                  {/* Botão de remover - só aparece para lembretes salvos do usuário */}
+                  {showDeleteButton && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🗑️ Delete button clicked for reminder:', {
+                          id: reminder.id,
+                          text: reminder.text,
+                          showDeleteButton,
+                          isUserReminder
+                        });
+                        removeReminder(reminder.id);
+                      }}
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                      disabled={removeReminderMutation.isPending}
+                      title={`Remover: ${reminder.text}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })
           )}
 
-          {!isLoading && !hasUserReminders && !isAdding && (
+          {!isLoading && displayReminders.length === 0 && (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground">
-                {reminders.length === 0 ? "Nenhum lembrete adicionado" : "Carregando lembretes..."}
+                Nenhum lembrete encontrado
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Clique em "Novo" para adicionar
