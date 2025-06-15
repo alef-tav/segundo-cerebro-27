@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Target, Plus, Upload, Trash2, Edit3 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Meta {
   id: string;
@@ -126,6 +126,10 @@ const Meta = () => {
     setVisionImages(visionImages.filter(img => img.id !== id));
   };
 
+  const removerMeta = (id: string) => {
+    setMetas(metas.filter(meta => meta.id !== id));
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -223,9 +227,32 @@ const Meta = () => {
               <div key={meta.id} className="space-y-3 p-4 rounded-lg border bg-card">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{meta.titulo}</h3>
-                  <span className={`text-sm font-medium ${getCategoriaColor(meta.categoria)}`}>
-                    {meta.categoria}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm font-medium ${getCategoriaColor(meta.categoria)}`}>
+                      {meta.categoria}
+                    </span>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir Meta</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir a meta "{meta.titulo}"? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => removerMeta(meta.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{meta.descricao}</p>
                 <div className="space-y-2">
