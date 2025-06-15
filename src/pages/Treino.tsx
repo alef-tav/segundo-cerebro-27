@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, Activity, Droplets, Clock, Plus, Utensils } from "lucide-react";
+import { Heart, Activity, Droplets, Clock, Plus, Utensils, X } from "lucide-react";
 import { HealthMetricCard } from "@/components/health/HealthMetricCard";
 import { useToast } from "@/hooks/use-toast";
 
@@ -79,6 +80,14 @@ const Treino = () => {
       }]);
       setNewMeal({ name: "", calories: "", protein: "", carbs: "", fat: "" });
     }
+  };
+
+  const deleteMeal = (index: number) => {
+    setMeals(meals.filter((_, i) => i !== index));
+    toast({
+      title: "Refeição removida!",
+      description: "A refeição foi excluída com sucesso.",
+    });
   };
 
   return (
@@ -225,8 +234,16 @@ const Treino = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {meals.map((meal, index) => (
-                <div key={index} className="p-4 rounded-lg border">
-                  <div className="flex justify-between items-center mb-2">
+                <div key={index} className="p-4 rounded-lg border relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => deleteMeal(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="flex justify-between items-center mb-2 pr-8">
                     <div className="flex items-center space-x-3">
                       <Utensils className="h-5 w-5 text-primary" />
                       <span className="font-medium">{meal.name}</span>
