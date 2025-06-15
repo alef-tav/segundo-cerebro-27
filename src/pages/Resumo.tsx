@@ -168,21 +168,21 @@ const Resumo = () => {
             Conquistas de Hoje
           </h3>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-100 dark:bg-green-900/20">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
               <Check className="h-4 w-4 text-green-500" />
-              <span className="text-sm">Completou ritual matinal</span>
+              <span className="text-sm text-card-foreground">Completou ritual matinal</span>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
               <Clock className="h-4 w-4 text-blue-500" />
-              <span className="text-sm">6 sessões Pomodoro concluídas</span>
+              <span className="text-sm text-card-foreground">6 sessões Pomodoro concluídas</span>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
               <Dumbbell className="h-4 w-4 text-purple-500" />
-              <span className="text-sm">Treino de musculação realizado</span>
+              <span className="text-sm text-card-foreground">Treino de musculação realizado</span>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
               <Brain className="h-4 w-4 text-orange-500" />
-              <span className="text-sm">2 novos conhecimentos adicionados</span>
+              <span className="text-sm text-card-foreground">2 novos conhecimentos adicionados</span>
             </div>
           </div>
         </Card>
