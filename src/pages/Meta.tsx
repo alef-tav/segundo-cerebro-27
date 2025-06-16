@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Target, Plus, Upload, Trash2 } from "lucide-react";
+import { Target, Plus, Upload, Trash2, AlertCircle } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +35,7 @@ const Meta = () => {
   const [metas, setMetas] = useState<Meta[]>([]);
   const [visionImages, setVisionImages] = useState<VisionImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
 
   const [novaMetaOpen, setNovaMetaOpen] = useState(false);
   const [novaImagemOpen, setNovaImagemOpen] = useState(false);
@@ -63,6 +63,64 @@ const Meta = () => {
       "Viagem": "text-pink-500"
     };
     return colors[categoria] || "text-gray-500";
+  };
+
+  // Função para validar se a URL é uma imagem válida
+  const validateImageUrl = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (!url || !url.trim()) {
+        resolve(false);
+        return;
+      }
+
+      // Verificar se é uma URL válida
+      try {
+        new URL(url);
+      } catch {
+        resolve(false);
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+      
+      // Timeout após 10 segundos
+      setTimeout(() => resolve(false), 10000);
+    });
+  };
+
+  // Função para lidar com erro de carregamento de imagem
+  const handleImageError = (imageId: string) => {
+    setImageLoadErrors(prev => new Set(prev).add(imageId));
+  };
+
+  // Componente para exibir imagem com fallback
+  const ImageWithFallback = ({ src, alt, imageId, className }: { src: string; alt: string; imageId: string; className?: string }) => {
+    const hasError = imageLoadErrors.has(imageId);
+
+    if (hasError) {
+      return (
+        <div className={`${className} bg-muted border-2 border-dashed border-border flex items-center justify-center`}>
+          <div className="text-center p-4">
+            <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">Erro ao carregar imagem</p>
+            <p className="text-xs text-muted-foreground mt-1">Verifique se a URL está correta</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onError={() => handleImageError(imageId)}
+        loading="lazy"
+      />
+    );
   };
 
   // Carregar metas do Supabase
@@ -191,6 +249,17 @@ const Meta = () => {
         variant: "destructive",
         title: "Erro",
         description: "Preencha pelo menos o título e adicione uma imagem."
+      });
+      return;
+    }
+
+    // Validar URL da imagem antes de salvar
+    const isValidImage = await validateImageUrl(novaImagem.imagem);
+    if (!isValidImage) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "URL da imagem inválida ou inacessível. Verifique se a URL está correta e tente novamente."
       });
       return;
     }
@@ -531,9 +600,10 @@ const Meta = () => {
                     <div>
                       <Label>Preview:</Label>
                       <AspectRatio ratio={4/3} className="bg-muted rounded-md overflow-hidden">
-                        <img
+                        <ImageWithFallback
                           src={novaImagem.imagem}
                           alt="Preview"
+                          imageId="preview"
                           className="w-full h-full object-cover"
                         />
                       </AspectRatio>
@@ -566,9 +636,10 @@ const Meta = () => {
                 visionImages.map((img) => (
                   <div key={img.id} className="group relative">
                     <AspectRatio ratio={4/3} className="bg-muted rounded-lg overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={img.imagem}
                         alt={img.titulo}
+                        imageId={img.id}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
