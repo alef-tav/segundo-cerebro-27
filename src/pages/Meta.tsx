@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Target, Plus, Upload, Trash2, Edit3 } from "lucide-react";
+import { Target, Plus, Upload, Trash2 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Meta {
   id: string;
@@ -28,9 +31,11 @@ interface VisionImage {
 }
 
 const Meta = () => {
-  // Começar com arrays vazios em vez de dados fictícios
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [metas, setMetas] = useState<Meta[]>([]);
   const [visionImages, setVisionImages] = useState<VisionImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [novaMetaOpen, setNovaMetaOpen] = useState(false);
   const [novaImagemOpen, setNovaImagemOpen] = useState(false);
@@ -60,37 +65,248 @@ const Meta = () => {
     return colors[categoria] || "text-gray-500";
   };
 
-  const adicionarMeta = () => {
-    if (novaMeta.titulo && novaMeta.categoria) {
-      const meta: Meta = {
-        id: Date.now().toString(),
-        ...novaMeta,
-        progresso: 0
-      };
-      setMetas(prevMetas => [...prevMetas, meta]);
+  // Carregar metas do Supabase
+  const carregarMetas = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('metas')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar metas:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível carregar as metas."
+        });
+        return;
+      }
+
+      setMetas(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar metas:', error);
+    }
+  };
+
+  // Carregar imagens do quadro de visão
+  const carregarImagens = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('vision_images')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar imagens:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível carregar as imagens do quadro de visão."
+        });
+        return;
+      }
+
+      setVisionImages(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar imagens:', error);
+    }
+  };
+
+  useEffect(() => {
+    const inicializar = async () => {
+      if (user) {
+        setLoading(true);
+        await Promise.all([carregarMetas(), carregarImagens()]);
+        setLoading(false);
+      }
+    };
+
+    inicializar();
+  }, [user]);
+
+  const adicionarMeta = async () => {
+    if (!novaMeta.titulo || !novaMeta.categoria || !user) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Preencha pelo menos o título e a categoria."
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('metas')
+        .insert([
+          {
+            user_id: user.id,
+            titulo: novaMeta.titulo,
+            categoria: novaMeta.categoria,
+            descricao: novaMeta.descricao || null,
+            prazo: novaMeta.prazo || null,
+            progresso: 0
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao adicionar meta:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível adicionar a meta."
+        });
+        return;
+      }
+
+      setMetas(prev => [data, ...prev]);
       setNovaMeta({ titulo: "", categoria: "", descricao: "", prazo: "" });
       setNovaMetaOpen(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Meta adicionada com sucesso!"
+      });
+    } catch (error) {
+      console.error('Erro ao adicionar meta:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível adicionar a meta."
+      });
     }
   };
 
-  const adicionarImagem = () => {
-    if (novaImagem.titulo && novaImagem.imagem) {
-      const imagem: VisionImage = {
-        id: Date.now().toString(),
-        ...novaImagem
-      };
-      setVisionImages(prevImages => [...prevImages, imagem]);
+  const adicionarImagem = async () => {
+    if (!novaImagem.titulo || !novaImagem.imagem || !user) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Preencha pelo menos o título e adicione uma imagem."
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('vision_images')
+        .insert([
+          {
+            user_id: user.id,
+            titulo: novaImagem.titulo,
+            imagem: novaImagem.imagem,
+            descricao: novaImagem.descricao || null
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao adicionar imagem:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível adicionar a imagem."
+        });
+        return;
+      }
+
+      setVisionImages(prev => [data, ...prev]);
       setNovaImagem({ titulo: "", imagem: "", descricao: "" });
       setNovaImagemOpen(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Imagem adicionada ao quadro de visão!"
+      });
+    } catch (error) {
+      console.error('Erro ao adicionar imagem:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível adicionar a imagem."
+      });
     }
   };
 
-  const removerImagem = (id: string) => {
-    setVisionImages(prevImages => prevImages.filter(img => img.id !== id));
+  const removerImagem = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('vision_images')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Erro ao remover imagem:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível remover a imagem."
+        });
+        return;
+      }
+
+      setVisionImages(prev => prev.filter(img => img.id !== id));
+      
+      toast({
+        title: "Sucesso",
+        description: "Imagem removida do quadro de visão!"
+      });
+    } catch (error) {
+      console.error('Erro ao remover imagem:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível remover a imagem."
+      });
+    }
   };
 
-  const removerMeta = (id: string) => {
-    setMetas(prevMetas => prevMetas.filter(meta => meta.id !== id));
+  const removerMeta = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('metas')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Erro ao remover meta:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível remover a meta."
+        });
+        return;
+      }
+
+      setMetas(prev => prev.filter(meta => meta.id !== id));
+      
+      toast({
+        title: "Sucesso",
+        description: "Meta removida com sucesso!"
+      });
+    } catch (error) {
+      console.error('Erro ao remover meta:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível remover a meta."
+      });
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +322,17 @@ const Meta = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-in">
+        <div className="space-y-2">
+          <h1 className="font-display text-4xl font-bold">Metas</h1>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in">

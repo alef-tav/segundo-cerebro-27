@@ -125,6 +125,42 @@ export type Database = {
         }
         Relationships: []
       }
+      metas: {
+        Row: {
+          categoria: string
+          created_at: string
+          descricao: string | null
+          id: string
+          prazo: string | null
+          progresso: number
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          prazo?: string | null
+          progresso?: number
+          titulo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          prazo?: string | null
+          progresso?: number
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -172,6 +208,33 @@ export type Database = {
           created_at?: string
           id?: string
           text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vision_images: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          imagem: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem?: string
+          titulo?: string
           user_id?: string
         }
         Relationships: []
