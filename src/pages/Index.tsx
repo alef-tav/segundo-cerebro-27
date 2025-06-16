@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { RemindersSection } from "@/components/reminders/RemindersSection";
+import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 
 const Index = () => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -89,22 +90,8 @@ const Index = () => {
           </div>
         </Card>
 
-        {/* Próximos Eventos */}
-        <Card className="p-6 bg-secondary border-0">
-          <h2 className="font-display text-xl font-semibold mb-4 text-primary">Próximos Eventos</h2>
-          <div className="text-center py-4 text-muted-foreground">
-            <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Nenhum evento agendado</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2"
-              onClick={() => navigate('/compromissos')}
-            >
-              Adicionar evento
-            </Button>
-          </div>
-        </Card>
+        {/* Próximos Eventos - Agora usando o componente atualizado */}
+        <UpcomingEventsCard />
       </div>
 
       {/* Seções detalhadas */}

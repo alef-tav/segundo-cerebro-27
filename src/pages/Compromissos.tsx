@@ -5,39 +5,41 @@ import { Plus } from "lucide-react";
 import { MonthlyCalendar } from "@/components/calendar/MonthlyCalendar";
 import { EventsList } from "@/components/calendar/EventsList";
 import { NewEventDialog } from "@/components/calendar/NewEventDialog";
-
-interface Event {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  description?: string;
-}
+import { useEvents } from "@/hooks/useEvents";
 
 const Compromissos = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+  const { events, addEvent, deleteEvent, isLoading } = useEvents();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false);
 
-  const handleAddEvent = (eventData: Omit<Event, 'id'>) => {
-    const newEvent: Event = {
-      ...eventData,
-      id: Date.now().toString(),
-    };
-    setEvents(prev => [...prev, newEvent]);
-  };
-
-  const handleDeleteEvent = (eventId: string) => {
-    setEvents(prev => prev.filter(event => event.id !== eventId));
+  const handleAddEvent = async (eventData: { title: string; date: Date; time: string; description?: string }) => {
+    try {
+      await addEvent(eventData);
+      setIsNewEventDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding event:', error);
+    }
   };
 
   const handleNewEventClick = () => {
     if (!selectedDate) {
-      // If no date is selected, select today
       setSelectedDate(new Date());
     }
     setIsNewEventDialogOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-in">
+        <div className="space-y-2">
+          <h1 className="font-display text-4xl font-bold">Calendário</h1>
+          <p className="text-muted-foreground">
+            Carregando sua agenda...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in">
@@ -57,7 +59,7 @@ const Compromissos = () => {
         
         <EventsList 
           events={events} 
-          onDeleteEvent={handleDeleteEvent}
+          onDeleteEvent={deleteEvent}
         />
       </div>
 

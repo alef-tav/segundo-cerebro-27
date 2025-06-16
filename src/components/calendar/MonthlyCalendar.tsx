@@ -1,16 +1,8 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-interface Event {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  description?: string;
-}
+import { Event } from "@/hooks/useEvents";
 
 interface MonthlyCalendarProps {
   events: Event[];
@@ -22,11 +14,11 @@ export const MonthlyCalendar = ({ events, selectedDate, onDateSelect }: MonthlyC
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
   ];
 
-  const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -38,12 +30,10 @@ export const MonthlyCalendar = ({ events, selectedDate, onDateSelect }: MonthlyC
 
     const days = [];
     
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDay; i++) {
       days.push(null);
     }
     
-    // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }

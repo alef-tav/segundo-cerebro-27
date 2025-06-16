@@ -14,43 +14,43 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 
-interface Event {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  description?: string;
-}
-
 interface NewEventDialogProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: Date | null;
-  onAddEvent: (event: Omit<Event, 'id'>) => void;
+  onAddEvent: (event: { title: string; date: Date; time: string; description?: string }) => Promise<void>;
 }
 
 export const NewEventDialog = ({ isOpen, onClose, selectedDate, onAddEvent }: NewEventDialogProps) => {
   const [title, setTitle] = useState("");
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title || !time || !selectedDate) return;
 
-    onAddEvent({
-      title,
-      date: selectedDate,
-      time,
-      description: description || undefined,
-    });
+    setIsSubmitting(true);
+    try {
+      await onAddEvent({
+        title,
+        date: selectedDate,
+        time,
+        description: description || undefined,
+      });
 
-    // Reset form
-    setTitle("");
-    setTime("");
-    setDescription("");
-    onClose();
+      // Reset form
+      setTitle("");
+      setTime("");
+      setDescription("");
+      onClose();
+    } catch (error) {
+      console.error('Error adding event:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatSelectedDate = (date: Date) => {
@@ -107,9 +107,9 @@ export const NewEventDialog = ({ isOpen, onClose, selectedDate, onAddEvent }: Ne
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={!title || !time}>
+            <Button type="submit" disabled={!title || !time || isSubmitting}>
               <Plus className="h-4 w-4 mr-2" />
-              Adicionar Evento
+              {isSubmitting ? 'Adicionando...' : 'Adicionar Evento'}
             </Button>
           </DialogFooter>
         </form>

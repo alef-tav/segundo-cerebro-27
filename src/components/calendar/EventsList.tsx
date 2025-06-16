@@ -3,14 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, X } from "lucide-react";
-
-interface Event {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  description?: string;
-}
+import { Event } from "@/hooks/useEvents";
 
 interface EventsListProps {
   events: Event[];
@@ -19,12 +12,12 @@ interface EventsListProps {
 
 export const EventsList = ({ events, onDeleteEvent }: EventsListProps) => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset to start of day for proper comparison
+  today.setHours(0, 0, 0, 0);
   
   const upcomingEvents = events
     .filter(event => {
       const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0); // Reset to start of day for proper comparison
+      eventDate.setHours(0, 0, 0, 0);
       return eventDate >= today;
     })
     .sort((a, b) => a.date.getTime() - b.date.getTime())
