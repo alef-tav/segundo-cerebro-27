@@ -30,7 +30,7 @@ export const useEvents = () => {
 
       const formattedEvents = data.map(event => ({
         ...event,
-        date: new Date(event.date)
+        date: new Date(event.date + 'T00:00:00') // Force local timezone
       }));
 
       setEvents(formattedEvents);
@@ -51,11 +51,20 @@ export const useEvents = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Format date as YYYY-MM-DD in local timezone
+      const year = eventData.date.getFullYear();
+      const month = String(eventData.date.getMonth() + 1).padStart(2, '0');
+      const day = String(eventData.date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+
+      console.log('Original date:', eventData.date);
+      console.log('Formatted date:', formattedDate);
+
       const { data, error } = await supabase
         .from('events')
         .insert([{
           title: eventData.title,
-          date: eventData.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          date: formattedDate,
           time: eventData.time,
           description: eventData.description,
           user_id: user.id
@@ -67,7 +76,7 @@ export const useEvents = () => {
 
       const newEvent = {
         ...data,
-        date: new Date(data.date)
+        date: new Date(data.date + 'T00:00:00') // Force local timezone
       };
 
       setEvents(prev => [...prev, newEvent]);

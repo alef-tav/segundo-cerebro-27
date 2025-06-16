@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,9 +43,13 @@ export const MonthlyCalendar = ({ events, selectedDate, onDateSelect }: MonthlyC
   };
 
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => 
-      event.date.toDateString() === date.toDateString()
-    );
+    return events.filter(event => {
+      // Compare only the date parts (year, month, day)
+      const eventDate = new Date(event.date);
+      return eventDate.getFullYear() === date.getFullYear() &&
+             eventDate.getMonth() === date.getMonth() &&
+             eventDate.getDate() === date.getDate();
+    });
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -60,12 +65,18 @@ export const MonthlyCalendar = ({ events, selectedDate, onDateSelect }: MonthlyC
   };
 
   const isSelectedDate = (date: Date) => {
-    return selectedDate && date.toDateString() === selectedDate.toDateString();
+    if (!selectedDate) return false;
+    // Compare only the date parts to avoid timezone issues
+    return selectedDate.getFullYear() === date.getFullYear() &&
+           selectedDate.getMonth() === date.getMonth() &&
+           selectedDate.getDate() === date.getDate();
   };
 
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.toDateString() === today.toDateString();
+    return date.getFullYear() === today.getFullYear() &&
+           date.getMonth() === today.getMonth() &&
+           date.getDate() === today.getDate();
   };
 
   return (
@@ -107,7 +118,7 @@ export const MonthlyCalendar = ({ events, selectedDate, onDateSelect }: MonthlyC
                 <Button
                   variant={isSelectedDate(date) ? "default" : "ghost"}
                   className={`w-full h-full p-1 text-sm relative ${
-                    isToday(date) ? "bg-accent" : ""
+                    isToday(date) && !isSelectedDate(date) ? "bg-accent" : ""
                   } ${getEventsForDate(date).length > 0 ? "ring-1 ring-primary" : ""}`}
                   onClick={() => onDateSelect(date)}
                 >
