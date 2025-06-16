@@ -20,27 +20,29 @@ import {
 } from "@/components/ui/select";
 import { KnowledgeItem } from "./KnowledgeCard";
 
-interface NewKnowledgeDialogProps {
+interface EditKnowledgeDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddItem: (item: Omit<KnowledgeItem, "id" | "createdAt">) => void;
+  onUpdateItem: (item: KnowledgeItem) => void;
+  item: KnowledgeItem;
 }
 
-export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeDialogProps) => {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState<"livro" | "curso" | "artigo">("livro");
-  const [status, setStatus] = useState<"a-fazer" | "em-andamento" | "concluido">("a-fazer");
-  const [description, setDescription] = useState("");
-  const [url, setUrl] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [pdfFile, setPdfFile] = useState<File | undefined>();
-  const [imageFile, setImageFile] = useState<File | undefined>();
+export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: EditKnowledgeDialogProps) => {
+  const [title, setTitle] = useState(item.title);
+  const [type, setType] = useState<"livro" | "curso" | "artigo">(item.type);
+  const [status, setStatus] = useState<"a-fazer" | "em-andamento" | "concluido">(item.status);
+  const [description, setDescription] = useState(item.description || "");
+  const [url, setUrl] = useState(item.url || "");
+  const [email, setEmail] = useState(item.email || "");
+  const [password, setPassword] = useState(item.password || "");
+  const [pdfFile, setPdfFile] = useState<File | undefined>(item.pdfFile);
+  const [imageFile, setImageFile] = useState<File | undefined>(item.imageFile);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      onAddItem({
+      onUpdateItem({
+        ...item,
         title: title.trim(),
         type,
         status,
@@ -51,25 +53,11 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
         pdfFile,
         imageFile,
       });
-      resetForm();
       onClose();
     }
   };
 
-  const resetForm = () => {
-    setTitle("");
-    setType("livro");
-    setStatus("a-fazer");
-    setDescription("");
-    setUrl("");
-    setEmail("");
-    setPassword("");
-    setPdfFile(undefined);
-    setImageFile(undefined);
-  };
-
   const handleClose = () => {
-    resetForm();
     onClose();
   };
 
@@ -91,7 +79,7 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Adicionar Novo Item</DialogTitle>
+          <DialogTitle>Editar Item</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit}>
@@ -222,7 +210,7 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
               Cancelar
             </Button>
             <Button type="submit" disabled={!title.trim()}>
-              Adicionar Item
+              Salvar Alterações
             </Button>
           </DialogFooter>
         </form>

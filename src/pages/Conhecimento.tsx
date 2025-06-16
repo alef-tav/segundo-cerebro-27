@@ -7,10 +7,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { KnowledgeCard, KnowledgeItem } from "@/components/knowledge/KnowledgeCard";
 import { NewKnowledgeDialog } from "@/components/knowledge/NewKnowledgeDialog";
+import { EditKnowledgeDialog } from "@/components/knowledge/EditKnowledgeDialog";
 
 const Conhecimento = () => {
   const [items, setItems] = useState<KnowledgeItem[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<KnowledgeItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("todos");
 
@@ -21,6 +24,17 @@ const Conhecimento = () => {
       createdAt: new Date(),
     };
     setItems([...items, item]);
+  };
+
+  const handleEditItem = (item: KnowledgeItem) => {
+    setEditingItem(item);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateItem = (updatedItem: KnowledgeItem) => {
+    setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
+    setIsEditDialogOpen(false);
+    setEditingItem(null);
   };
 
   const handleDeleteItem = (id: string) => {
@@ -101,6 +115,7 @@ const Conhecimento = () => {
                   key={item.id}
                   item={item}
                   onDelete={handleDeleteItem}
+                  onEdit={handleEditItem}
                 />
               ))}
             </div>
@@ -114,6 +129,7 @@ const Conhecimento = () => {
                 key={item.id}
                 item={item}
                 onDelete={handleDeleteItem}
+                onEdit={handleEditItem}
               />
             ))}
           </div>
@@ -133,6 +149,7 @@ const Conhecimento = () => {
                 key={item.id}
                 item={item}
                 onDelete={handleDeleteItem}
+                onEdit={handleEditItem}
               />
             ))}
           </div>
@@ -152,6 +169,7 @@ const Conhecimento = () => {
                 key={item.id}
                 item={item}
                 onDelete={handleDeleteItem}
+                onEdit={handleEditItem}
               />
             ))}
           </div>
@@ -170,6 +188,18 @@ const Conhecimento = () => {
         onClose={() => setIsDialogOpen(false)}
         onAddItem={handleAddItem}
       />
+
+      {editingItem && (
+        <EditKnowledgeDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => {
+            setIsEditDialogOpen(false);
+            setEditingItem(null);
+          }}
+          onUpdateItem={handleUpdateItem}
+          item={editingItem}
+        />
+      )}
     </div>
   );
 };
