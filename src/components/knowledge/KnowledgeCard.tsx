@@ -3,21 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PlayCircle, FileText, Link, Upload, Trash2, Edit, Mail, Lock } from "lucide-react";
-
-export interface KnowledgeItem {
-  id: string;
-  title: string;
-  type: "livro" | "curso" | "artigo";
-  status: "a-fazer" | "em-andamento" | "concluido";
-  description?: string;
-  url?: string;
-  email?: string;
-  password?: string;
-  pdf_file_name?: string;
-  image_file_name?: string;
-  created_at: Date;
-  updated_at: Date;
-}
+import { KnowledgeItem } from "@/hooks/useKnowledgeItems";
 
 interface KnowledgeCardProps {
   item: KnowledgeItem;

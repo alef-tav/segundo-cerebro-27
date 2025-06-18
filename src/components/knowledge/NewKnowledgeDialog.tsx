@@ -18,12 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KnowledgeItem } from "./KnowledgeCard";
+import { KnowledgeItem } from "@/hooks/useKnowledgeItems";
 
 interface NewKnowledgeDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddItem: (item: Omit<KnowledgeItem, "id" | "created_at" | "updated_at">) => void;
+  onAddItem: (item: Omit<KnowledgeItem, "id" | "user_id" | "created_at" | "updated_at">) => void;
 }
 
 export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeDialogProps) => {
@@ -44,12 +44,12 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
         title: title.trim(),
         type,
         status,
-        description: description.trim() || undefined,
-        url: url.trim() || undefined,
-        email: email.trim() || undefined,
-        password: password.trim() || undefined,
-        pdf_file_name: pdfFileName,
-        image_file_name: imageFileName,
+        description: description.trim() || null,
+        url: url.trim() || null,
+        email: email.trim() || null,
+        password: password.trim() || null,
+        pdf_file_name: pdfFileName || null,
+        image_file_name: imageFileName || null,
       });
       resetForm();
     }

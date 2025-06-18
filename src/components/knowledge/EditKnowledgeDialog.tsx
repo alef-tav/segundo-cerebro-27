@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KnowledgeItem } from "./KnowledgeCard";
+import { KnowledgeItem } from "@/hooks/useKnowledgeItems";
 
 interface EditKnowledgeDialogProps {
   isOpen: boolean;
@@ -35,8 +35,8 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
   const [url, setUrl] = useState(item.url || "");
   const [email, setEmail] = useState(item.email || "");
   const [password, setPassword] = useState(item.password || "");
-  const [pdfFileName, setPdfFileName] = useState<string | undefined>(item.pdf_file_name);
-  const [imageFileName, setImageFileName] = useState<string | undefined>(item.image_file_name);
+  const [pdfFileName, setPdfFileName] = useState<string | undefined>(item.pdf_file_name || undefined);
+  const [imageFileName, setImageFileName] = useState<string | undefined>(item.image_file_name || undefined);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +46,12 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
         title: title.trim(),
         type,
         status,
-        description: description.trim() || undefined,
-        url: url.trim() || undefined,
-        email: email.trim() || undefined,
-        password: password.trim() || undefined,
-        pdf_file_name: pdfFileName,
-        image_file_name: imageFileName,
+        description: description.trim() || null,
+        url: url.trim() || null,
+        email: email.trim() || null,
+        password: password.trim() || null,
+        pdf_file_name: pdfFileName || null,
+        image_file_name: imageFileName || null,
       });
       onClose();
     }

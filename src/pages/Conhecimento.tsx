@@ -20,7 +20,7 @@ const Conhecimento = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("todos");
 
-  const handleAddItem = async (newItem: Omit<KnowledgeItem, "id" | "created_at" | "updated_at">) => {
+  const handleAddItem = async (newItem: Omit<KnowledgeItem, "id" | "user_id" | "created_at" | "updated_at">) => {
     await addItem(newItem);
     setIsDialogOpen(false);
   };
@@ -31,7 +31,7 @@ const Conhecimento = () => {
   };
 
   const handleUpdateItem = async (updatedItem: KnowledgeItem) => {
-    await updateItem(updatedItem);
+    await updateItem(updatedItem.id, updatedItem);
     setIsEditDialogOpen(false);
     setEditingItem(null);
   };
