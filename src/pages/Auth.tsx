@@ -7,15 +7,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Brain, Lock, Mail, User } from 'lucide-react';
+import { Loader2, Brain, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     fullName: '',
     confirmPassword: ''
+  });
+  const [formErrors, setFormErrors] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: ''
   });
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -26,32 +34,101 @@ export default function Auth() {
     }
   }, [user, navigate]);
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = (isSignUp: boolean) => {
+    const errors = {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      fullName: ''
+    };
+
+    if (!formData.email) {
+      errors.email = 'Email é obrigatório';
+    } else if (!validateEmail(formData.email)) {
+      errors.email = 'Email inválido';
+    }
+
+    if (!formData.password) {
+      errors.password = 'Senha é obrigatória';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Senha deve ter pelo menos 6 caracteres';
+    }
+
+    if (isSignUp) {
+      if (!formData.fullName.trim()) {
+        errors.fullName = 'Nome é obrigatório';
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        errors.confirmPassword = 'As senhas não coincidem';
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.values(errors).every(error => error === '');
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+    
+    // Clear error when user starts typing
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    await signIn(formData.email, formData.password);
-    setIsLoading(false);
+    if (!validateForm(false)) {
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const { error } = await signIn(formData.email, formData.password);
+      if (!error) {
+        // Navigation will happen automatically when user state changes
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      alert('As senhas não coincidem');
+    if (!validateForm(true)) {
       return;
     }
     
     setIsLoading(true);
-    await signUp(formData.email, formData.password, formData.fullName);
-    setIsLoading(false);
+    try {
+      const { error } = await signUp(formData.email, formData.password, formData.fullName);
+      if (!error) {
+        // Clear form after successful signup
+        setFormData({
+          email: '',
+          password: '',
+          fullName: '',
+          confirmPassword: ''
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -103,12 +180,12 @@ export default function Auth() {
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signin-email" className="text-gray-200 flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     Email
                   </Label>
                   <Input
-                    id="email"
+                    id="signin-email"
                     name="email"
                     type="email"
                     placeholder="seu@email.com"
@@ -117,22 +194,39 @@ export default function Auth() {
                     className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
                     required
                   />
+                  {formErrors.email && (
+                    <p className="text-sm text-red-400">{formErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signin-password" className="text-gray-200 flex items-center gap-2">
                     <Lock className="h-4 w-4" />
                     Senha
                   </Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signin-password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {formErrors.password && (
+                    <p className="text-sm text-red-400">{formErrors.password}</p>
+                  )}
                 </div>
                 <Button 
                   type="submit" 
@@ -148,12 +242,12 @@ export default function Auth() {
             <TabsContent value="signup" className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signup-fullName" className="text-gray-200 flex items-center gap-2">
                     <User className="h-4 w-4" />
                     Nome Completo
                   </Label>
                   <Input
-                    id="fullName"
+                    id="signup-fullName"
                     name="fullName"
                     type="text"
                     placeholder="Seu nome completo"
@@ -162,14 +256,17 @@ export default function Auth() {
                     className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
                     required
                   />
+                  {formErrors.fullName && (
+                    <p className="text-sm text-red-400">{formErrors.fullName}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signup-email" className="text-gray-200 flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     Email
                   </Label>
                   <Input
-                    id="email"
+                    id="signup-email"
                     name="email"
                     type="email"
                     placeholder="seu@email.com"
@@ -178,38 +275,69 @@ export default function Auth() {
                     className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
                     required
                   />
+                  {formErrors.email && (
+                    <p className="text-sm text-red-400">{formErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signup-password" className="text-gray-200 flex items-center gap-2">
                     <Lock className="h-4 w-4" />
-                    Senha
+                    Senha (mínimo 6 caracteres)
                   </Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {formErrors.password && (
+                    <p className="text-sm text-red-400">{formErrors.password}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-200 flex items-center gap-2">
+                  <Label htmlFor="signup-confirmPassword" className="text-gray-200 flex items-center gap-2">
                     <Lock className="h-4 w-4" />
                     Confirmar Senha
                   </Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400 pr-10"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {formErrors.confirmPassword && (
+                    <p className="text-sm text-red-400">{formErrors.confirmPassword}</p>
+                  )}
                 </div>
                 <Button 
                   type="submit" 
