@@ -23,7 +23,7 @@ import { KnowledgeItem } from "./KnowledgeCard";
 interface NewKnowledgeDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddItem: (item: Omit<KnowledgeItem, "id" | "createdAt">) => void;
+  onAddItem: (item: Omit<KnowledgeItem, "id" | "created_at" | "updated_at">) => void;
 }
 
 export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeDialogProps) => {
@@ -34,8 +34,8 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
   const [url, setUrl] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pdfFile, setPdfFile] = useState<File | undefined>();
-  const [imageFile, setImageFile] = useState<File | undefined>();
+  const [pdfFileName, setPdfFileName] = useState<string | undefined>();
+  const [imageFileName, setImageFileName] = useState<string | undefined>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +48,10 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
         url: url.trim() || undefined,
         email: email.trim() || undefined,
         password: password.trim() || undefined,
-        pdfFile,
-        imageFile,
+        pdf_file_name: pdfFileName,
+        image_file_name: imageFileName,
       });
       resetForm();
-      onClose();
     }
   };
 
@@ -64,8 +63,8 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
     setUrl("");
     setEmail("");
     setPassword("");
-    setPdfFile(undefined);
-    setImageFile(undefined);
+    setPdfFileName(undefined);
+    setImageFileName(undefined);
   };
 
   const handleClose = () => {
@@ -76,14 +75,14 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
-      setPdfFile(file);
+      setPdfFileName(file.name);
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
-      setImageFile(file);
+      setImageFileName(file.name);
     }
   };
 
@@ -193,9 +192,9 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
                   accept=".pdf"
                   onChange={handlePdfChange}
                 />
-                {pdfFile && (
+                {pdfFileName && (
                   <p className="text-sm text-muted-foreground">
-                    Arquivo selecionado: {pdfFile.name}
+                    Arquivo selecionado: {pdfFileName}
                   </p>
                 )}
               </div>
@@ -209,9 +208,9 @@ export const NewKnowledgeDialog = ({ isOpen, onClose, onAddItem }: NewKnowledgeD
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {imageFile && (
+              {imageFileName && (
                 <p className="text-sm text-muted-foreground">
-                  Imagem selecionada: {imageFile.name}
+                  Imagem selecionada: {imageFileName}
                 </p>
               )}
             </div>

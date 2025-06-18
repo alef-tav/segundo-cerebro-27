@@ -13,9 +13,10 @@ export interface KnowledgeItem {
   url?: string;
   email?: string;
   password?: string;
-  pdfFile?: File;
-  imageFile?: File;
-  createdAt: Date;
+  pdf_file_name?: string;
+  image_file_name?: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface KnowledgeCardProps {
@@ -120,7 +121,7 @@ export const KnowledgeCard = ({ item, onDelete, onEdit }: KnowledgeCardProps) =>
             </Button>
           )}
           
-          {item.pdfFile && (
+          {item.pdf_file_name && (
             <Button variant="outline" size="sm">
               <Upload className="h-4 w-4 mr-1" />
               PDF Anexado

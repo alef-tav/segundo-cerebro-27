@@ -4,26 +4,25 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { BookOpen, Plus, Search } from "lucide-react";
-import { KnowledgeCard, KnowledgeItem } from "@/components/knowledge/KnowledgeCard";
+import { BookOpen, Plus, Search, Loader2 } from "lucide-react";
+import { KnowledgeCard } from "@/components/knowledge/KnowledgeCard";
 import { NewKnowledgeDialog } from "@/components/knowledge/NewKnowledgeDialog";
 import { EditKnowledgeDialog } from "@/components/knowledge/EditKnowledgeDialog";
+import { useKnowledgeItems, KnowledgeItem } from "@/hooks/useKnowledgeItems";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Conhecimento = () => {
-  const [items, setItems] = useState<KnowledgeItem[]>([]);
+  const { user } = useAuth();
+  const { items, loading, addItem, updateItem, deleteItem } = useKnowledgeItems();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<KnowledgeItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("todos");
 
-  const handleAddItem = (newItem: Omit<KnowledgeItem, "id" | "createdAt">) => {
-    const item: KnowledgeItem = {
-      ...newItem,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setItems([...items, item]);
+  const handleAddItem = async (newItem: Omit<KnowledgeItem, "id" | "created_at" | "updated_at">) => {
+    await addItem(newItem);
+    setIsDialogOpen(false);
   };
 
   const handleEditItem = (item: KnowledgeItem) => {
@@ -31,14 +30,14 @@ const Conhecimento = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateItem = (updatedItem: KnowledgeItem) => {
-    setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
+  const handleUpdateItem = async (updatedItem: KnowledgeItem) => {
+    await updateItem(updatedItem);
     setIsEditDialogOpen(false);
     setEditingItem(null);
   };
 
-  const handleDeleteItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+  const handleDeleteItem = async (id: string) => {
+    await deleteItem(id);
   };
 
   const filteredItems = items.filter(item => {
@@ -52,6 +51,35 @@ const Conhecimento = () => {
     if (!type) return filteredItems;
     return filteredItems.filter(item => item.type === type);
   };
+
+  if (!user) {
+    return (
+      <div className="space-y-8 animate-in">
+        <div className="space-y-2">
+          <h1 className="font-display text-4xl font-bold">Biblioteca de Conhecimento</h1>
+          <p className="text-muted-foreground">
+            Faça login para acessar sua biblioteca de conhecimento.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-in">
+        <div className="space-y-2">
+          <h1 className="font-display text-4xl font-bold">Biblioteca de Conhecimento</h1>
+          <p className="text-muted-foreground">
+            Organize seus estudos e aprendizados.
+          </p>
+        </div>
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in">

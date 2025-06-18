@@ -35,8 +35,8 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
   const [url, setUrl] = useState(item.url || "");
   const [email, setEmail] = useState(item.email || "");
   const [password, setPassword] = useState(item.password || "");
-  const [pdfFile, setPdfFile] = useState<File | undefined>(item.pdfFile);
-  const [imageFile, setImageFile] = useState<File | undefined>(item.imageFile);
+  const [pdfFileName, setPdfFileName] = useState<string | undefined>(item.pdf_file_name);
+  const [imageFileName, setImageFileName] = useState<string | undefined>(item.image_file_name);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +50,8 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
         url: url.trim() || undefined,
         email: email.trim() || undefined,
         password: password.trim() || undefined,
-        pdfFile,
-        imageFile,
+        pdf_file_name: pdfFileName,
+        image_file_name: imageFileName,
       });
       onClose();
     }
@@ -64,14 +64,14 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
-      setPdfFile(file);
+      setPdfFileName(file.name);
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
-      setImageFile(file);
+      setImageFileName(file.name);
     }
   };
 
@@ -181,9 +181,9 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
                   accept=".pdf"
                   onChange={handlePdfChange}
                 />
-                {pdfFile && (
+                {pdfFileName && (
                   <p className="text-sm text-muted-foreground">
-                    Arquivo selecionado: {pdfFile.name}
+                    Arquivo selecionado: {pdfFileName}
                   </p>
                 )}
               </div>
@@ -197,9 +197,9 @@ export const EditKnowledgeDialog = ({ isOpen, onClose, onUpdateItem, item }: Edi
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {imageFile && (
+              {imageFileName && (
                 <p className="text-sm text-muted-foreground">
-                  Imagem selecionada: {imageFile.name}
+                  Imagem selecionada: {imageFileName}
                 </p>
               )}
             </div>

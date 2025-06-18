@@ -158,6 +158,54 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          image_file_name: string | null
+          password: string | null
+          pdf_file_name: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_file_name?: string | null
+          password?: string | null
+          pdf_file_name?: string | null
+          status: string
+          title: string
+          type: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_file_name?: string | null
+          password?: string | null
+          pdf_file_name?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       metas: {
         Row: {
           categoria: string
